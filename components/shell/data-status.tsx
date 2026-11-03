@@ -1,4 +1,6 @@
+import { RefreshCw } from "lucide-react"
 import { DATA_STATE, MONTH_NAMES } from "@/lib/data/calendar"
+import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 /** Dashed outline = provisional, echoing the provisional bar notation in the charts. */
@@ -7,24 +9,27 @@ export function DataStatus() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div
-          tabIndex={0}
-          className="flex items-center gap-2 rounded-[4px] border border-dashed border-neutral-500 bg-white px-3 py-1 text-[13px] whitespace-nowrap text-neutral-800"
-        >
-          <span className="font-semibold text-neutral-950">
+        <Badge tabIndex={0} variant="outline" className="h-7 gap-2 border-dashed px-2.5 text-xs font-normal text-muted-foreground">
+          <span className="relative flex size-2" aria-hidden>
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-60" />
+            <span className="relative inline-flex size-2 rounded-full bg-amber-500" />
+          </span>
+          <span className="font-medium text-foreground">
             {month} · {DATA_STATE.status}
           </span>
-          <span aria-hidden className="text-neutral-400">·</span>
-          <span>
-            Close day {DATA_STATE.closeDay} of {DATA_STATE.closeDays}
+          <span className="flex items-center gap-1" aria-label={`Close day ${DATA_STATE.closeDay} of ${DATA_STATE.closeDays}`}>
+            {Array.from({ length: DATA_STATE.closeDays }, (_, i) => (
+              <span key={i} className={`h-1.5 w-2.5 rounded-full ${i < DATA_STATE.closeDay ? "bg-amber-500" : "bg-border"}`} />
+            ))}
           </span>
-          <span aria-hidden className="text-neutral-400">·</span>
-          <span>Last sync {DATA_STATE.lastSync}</span>
-        </div>
+          <span className="flex items-center gap-1">
+            <RefreshCw className="size-3" aria-hidden /> {DATA_STATE.lastSync}
+          </span>
+        </Badge>
       </TooltipTrigger>
       <TooltipContent side="bottom" className="max-w-72">
-        {month} actuals are provisional until accounting closes the month (day {DATA_STATE.closeDays}). Figures can
-        still move. Data syncs from the ERP every morning.
+        Close day {DATA_STATE.closeDay} of {DATA_STATE.closeDays}. {month} actuals are provisional until accounting closes the
+        month. Figures can still move. Data syncs from the ERP every morning (last sync {DATA_STATE.lastSync}).
       </TooltipContent>
     </Tooltip>
   )

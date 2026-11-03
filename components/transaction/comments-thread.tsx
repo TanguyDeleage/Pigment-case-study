@@ -9,7 +9,7 @@ const timeFmt = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short
 
 function Avatar({ initials }: { initials: string }) {
   return (
-    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-[11px] font-semibold text-neutral-700">
+    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
       {initials}
     </span>
   )
@@ -38,11 +38,11 @@ export function CommentsThread({ initial }: { initial: Comment[] }) {
               <div className="min-w-0">
                 <div className="text-[12.5px]">
                   <span className="font-semibold">{author.name}</span>{" "}
-                  <span className="text-neutral-500">
+                  <span className="text-muted-foreground">
                     {author.role} · {timeFmt.format(new Date(c.at))}
                   </span>
                 </div>
-                <p className="mt-0.5 text-[13.5px] text-neutral-900">{c.body}</p>
+                <p className="mt-0.5 text-[13.5px] text-foreground">{c.body}</p>
               </div>
             </li>
           )

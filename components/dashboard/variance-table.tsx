@@ -12,7 +12,7 @@ import {
   type ExpandedState,
   type Row,
 } from "@tanstack/react-table"
-import { ArrowRight, ChevronDown, ChevronRight, Flag, Search, X } from "lucide-react"
+import { ArrowRight, ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Flag, Search, X } from "lucide-react"
 import type { DepartmentId } from "@/lib/data"
 import { MONTH_NAMES, ytdLabel } from "@/lib/data/calendar"
 import type { VarianceRow } from "@/lib/finance/aggregate"
@@ -21,7 +21,9 @@ import { ATTENTION_THRESHOLD, isFavourable, variance, variancePct } from "@/lib/
 import { cn } from "@/lib/utils"
 import { PendingMarker } from "@/components/corrections/pending-marker"
 import { FavBadge, favClass } from "@/components/shell/status-badge"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
@@ -174,55 +176,59 @@ export function VarianceTable({ rows, month, focus, onClearFocus }: VarianceTabl
   const groupStart = new Set(["month", "ytd", "status-group", "month-actual", "ytd-actual", "status"])
 
   return (
-    <section className="rounded-md border bg-white px-5 pt-4 pb-4" aria-labelledby="variance-title">
-      <div className="mb-3 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <h2 id="variance-title" className="text-[17px] font-semibold text-neutral-950">
-            {MONTH_NAMES[month]} 2026 · Variance detail
-          </h2>
+    <Card className="gap-0 py-0 shadow-xs" aria-labelledby="variance-title">
+      <CardHeader className="border-b py-4">
+        <CardTitle id="variance-title" className="flex items-center gap-2">
+          Variance detail
           {focus && (
-            <span className="flex h-7 items-center gap-1 rounded-full border border-neutral-800 bg-neutral-50 pr-1 pl-3 text-[13px] font-medium">
-              Filtered: {focus.label}
-              <Button variant="ghost" size="icon-xs" className="rounded-full" onClick={onClearFocus} aria-label="Clear filter">
+            <Badge variant="secondary" className="h-6 gap-1 pr-0.5 pl-2.5 font-medium">
+              {focus.label}
+              <Button variant="ghost" size="icon-xs" className="size-5 rounded-full" onClick={onClearFocus} aria-label="Clear filter">
                 <X />
               </Button>
-            </span>
+            </Badge>
           )}
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2.5">
-            <Switch id="attention-only" checked={attentionOnly} onCheckedChange={setAttentionOnly} className="data-[state=checked]:bg-neutral-800" />
-            <Label htmlFor="attention-only" className="text-[14px] font-normal text-neutral-900">
+        </CardTitle>
+        <CardDescription>
+          {MONTH_NAMES[month]} 2026 and year to date · €k
+        </CardDescription>
+        <CardAction className="flex items-center gap-2 self-center">
+          <div className="flex h-9 items-center gap-2 rounded-lg border px-3 shadow-xs">
+            <Switch id="attention-only" checked={attentionOnly} onCheckedChange={setAttentionOnly} />
+            <Label htmlFor="attention-only" className="text-sm font-normal">
               Needs attention only
             </Label>
           </div>
           <div className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-500" aria-hidden />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search line or GL account"
               aria-label="Search line or GL account"
-              className="h-9 w-72 pl-9 text-[14px]"
+              className="h-9 w-64 pl-9 shadow-xs"
             />
           </div>
-          <Button variant="outline" className="h-9 px-3.5 text-[14px]" onClick={() => table.toggleAllRowsExpanded(!allExpanded)}>
+          <Button variant="outline" className="h-9 shadow-xs" onClick={() => table.toggleAllRowsExpanded(!allExpanded)}>
+            {allExpanded ? <ChevronsDownUp /> : <ChevronsUpDown />}
             {allExpanded ? "Collapse all" : "Expand all"}
           </Button>
-        </div>
-      </div>
+        </CardAction>
+      </CardHeader>
 
-      <Table className="text-[14px]">
+      <CardContent className="px-0">
+      <Table className="text-[13.5px]">
         <TableHeader>
           {table.getHeaderGroups().map((hg, gi) => (
-            <TableRow key={hg.id} className="hover:bg-transparent">
+            <TableRow key={hg.id} className="bg-muted/40 hover:bg-muted/40">
               {hg.headers.map((h) => (
                 <TableHead
                   key={h.id}
                   colSpan={h.colSpan}
                   className={cn(
-                    "h-9 font-medium text-neutral-800",
-                    gi === 0 ? "text-center text-[13px]" : "text-[13px]",
+                    "h-9 text-xs font-medium text-muted-foreground",
+                    gi === 0 && "text-center",
+                    h.column.id === "label" && "pl-6",
                     gi === 0 && h.isPlaceholder && "border-b-0",
                     groupStart.has(h.column.id) && h.id !== "line" && "border-l",
                     h.column.id === "label" && "w-[30%]",
@@ -245,13 +251,16 @@ export function VarianceTable({ rows, month, focus, onClearFocus }: VarianceTabl
                 onClick={clickable ? () => router.push(detailHref(r)) : undefined}
                 className={cn(
                   "group h-11",
-                  r.kind === "group" && "bg-neutral-100/80 font-semibold hover:bg-neutral-100",
-                  r.kind === "department" && "font-semibold",
-                  clickable && "cursor-pointer hover:bg-neutral-100",
+                  r.kind === "group" && "bg-muted/30 font-semibold hover:bg-muted/50",
+                  r.kind === "department" && "font-medium",
+                  clickable && "cursor-pointer",
                 )}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className={cn("py-2", groupStart.has(cell.column.id) && "border-l")}>
+                  <TableCell
+                    key={cell.id}
+                    className={cn("py-2 tabular-nums", groupStart.has(cell.column.id) && "border-l", cell.column.id === "label" && "pl-6")}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -260,7 +269,7 @@ export function VarianceTable({ rows, month, focus, onClearFocus }: VarianceTabl
           })}
           {data.length === 0 && (
             <TableRow>
-              <TableCell colSpan={10} className="py-8 text-center text-neutral-500">
+              <TableCell colSpan={10} className="py-10 text-center text-muted-foreground">
                 No lines match.
               </TableCell>
             </TableRow>
@@ -268,7 +277,9 @@ export function VarianceTable({ rows, month, focus, onClearFocus }: VarianceTabl
         </TableBody>
       </Table>
 
-      <div className="mt-3 flex justify-between text-[13px] text-neutral-700">
+      </CardContent>
+
+      <CardFooter className="justify-between py-3 text-xs text-muted-foreground">
         <span>
           {attentionOnly
             ? `${hiddenDepts} departments and ${hiddenLines} accounts hidden: within threshold. Turn off 'Needs attention only' to see all.`
@@ -277,8 +288,8 @@ export function VarianceTable({ rows, month, focus, onClearFocus }: VarianceTabl
         <span>
           Needs attention = |Var| &gt; {ATTENTION_THRESHOLD.pct * 100}% and &gt; €{ATTENTION_THRESHOLD.abs / 1000}k
         </span>
-      </div>
-    </section>
+      </CardFooter>
+    </Card>
   )
 }
 
@@ -298,16 +309,16 @@ function LineCell({ row }: { row: Row<VarianceRow> }) {
           disabled={!canExpand}
           aria-label={row.getIsExpanded() ? `Collapse ${r.label}` : `Expand ${r.label}`}
           aria-expanded={row.getIsExpanded()}
-          className="flex size-4 items-center justify-center rounded-sm text-neutral-700 disabled:opacity-30"
+          className="flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30"
         >
           {row.getIsExpanded() ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
         </button>
       ) : (
         <span className="flex w-6 justify-end">
-          {r.attention && <Flag className="size-3.5 fill-neutral-900 text-neutral-900" aria-label="Needs attention" />}
+          {r.attention && <Flag className="size-3.5 fill-unfav text-unfav" aria-label="Needs attention" />}
         </span>
       )}
-      <span className={cn("truncate", r.kind === "line" && "pl-1 text-neutral-900")}>{r.label}</span>
+      <span className={cn("truncate", r.kind === "line" && "pl-1")}>{r.label}</span>
     </div>
   )
 }
@@ -318,7 +329,10 @@ function StatusCell({ row: r }: { row: VarianceRow }) {
   if (r.kind !== "line" || !r.attention) {
     return (
       <div className="flex items-center gap-2">
-        <span className="font-normal text-neutral-600">{fav ? "Fav" : "Unfav"}</span>
+        <span className={cn("flex items-center gap-1.5 text-xs font-normal", "text-muted-foreground")}>
+          <span className={cn("size-1.5 rounded-full", fav ? "bg-fav/60" : "bg-unfav/60")} aria-hidden />
+          {fav ? "Fav" : "Unfav"}
+        </span>
         {r.lineId && <PendingMarker lineId={r.lineId} />}
       </div>
     )
@@ -326,14 +340,14 @@ function StatusCell({ row: r }: { row: VarianceRow }) {
   return (
     <div className="flex items-center gap-2">
       <FavBadge favourable={fav} />
-      <span className="font-semibold whitespace-nowrap text-neutral-900">Needs attention</span>
+      <span className="text-xs font-medium whitespace-nowrap">Needs attention</span>
       {r.lineId && <PendingMarker lineId={r.lineId} />}
       <Link
         href={detailHref(r)}
         onClick={(e) => e.stopPropagation()}
-        className="ml-auto flex items-center gap-1 font-medium whitespace-nowrap text-neutral-950 underline underline-offset-4 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+        className="ml-auto flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium whitespace-nowrap opacity-0 group-hover:bg-background group-hover:opacity-100 hover:underline focus-visible:opacity-100"
       >
-        View transactions <ArrowRight className="size-3.5" aria-hidden />
+        View <ArrowRight className="size-3.5" aria-hidden />
       </Link>
     </div>
   )

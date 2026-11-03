@@ -12,13 +12,13 @@ interface FavBadgeProps {
 export function FavBadge({ favourable, detail, className }: FavBadgeProps) {
   return (
     <Badge
-      variant="outline"
       className={cn(
-        "h-[22px] rounded-full bg-white px-2 text-[12px] font-semibold",
-        favourable ? "border-fav text-fav" : "border-unfav text-unfav",
+        "gap-1.5 font-medium",
+        favourable ? "bg-fav-soft text-fav" : "bg-unfav-soft text-unfav",
         className,
       )}
     >
+      <span className={cn("size-1.5 rounded-full", favourable ? "bg-fav" : "bg-unfav")} aria-hidden />
       {favourable ? "Fav" : "Unfav"}
       {detail ? ` · ${detail}` : null}
     </Badge>

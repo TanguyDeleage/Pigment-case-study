@@ -20,7 +20,7 @@ const dateFmt = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section>
-      <h3 className="mb-2 text-[12px] font-semibold tracking-wide text-neutral-500 uppercase">{title}</h3>
+      <h3 className="mb-2 text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">{title}</h3>
       {children}
     </section>
   )
@@ -29,8 +29,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex justify-between gap-4 py-1 text-[13.5px]">
-      <span className="text-neutral-600">{label}</span>
-      <span className="text-right font-medium text-neutral-950">{children}</span>
+      <span className="text-muted-foreground">{label}</span>
+      <span className="text-right font-medium text-foreground">{children}</span>
     </div>
   )
 }
@@ -61,17 +61,17 @@ function TransactionPanel({ transaction: t }: { transaction: Transaction }) {
   return (
     <>
       <SheetHeader className="border-b px-6 pt-6 pb-4">
-        <div className="text-[12px] text-neutral-500">
+        <div className="text-[12px] text-muted-foreground">
           {t.id} · posted {dateFmt.format(new Date(t.postingDate))} · provisional
         </div>
         <SheetTitle className="text-[20px]">{t.vendor}</SheetTitle>
-        <SheetDescription className="text-[13.5px] text-neutral-700">{t.description}</SheetDescription>
-        <div className="mt-1 text-[28px] font-semibold tracking-tight text-neutral-950">{formatEurExact(t.amount)}</div>
+        <SheetDescription className="text-[13.5px] text-muted-foreground">{t.description}</SheetDescription>
+        <div className="mt-1 text-[28px] font-semibold tracking-tight text-foreground">{formatEurExact(t.amount)}</div>
       </SheetHeader>
 
       <div className="space-y-6 px-6 py-5">
         {request && (
-          <div className="rounded-md border border-dashed border-neutral-600 bg-neutral-50 px-4 py-3">
+          <div className="rounded-lg border border-dashed border-amber-500/60 bg-amber-50/60 px-4 py-3">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-[14px] font-semibold">
                 <Clock className="size-4" aria-hidden />
@@ -79,7 +79,7 @@ function TransactionPanel({ transaction: t }: { transaction: Transaction }) {
               </span>
               <RequestStatusBadge status={request.status} />
             </div>
-            <p className="mt-1 text-[13px] text-neutral-700">
+            <p className="mt-1 text-[13px] text-muted-foreground">
               {request.id} · {formatEurExact(request.amount)} to {DEPARTMENTS[request.to.deptId].name} · {request.to.accountCode}.{" "}
               {pending
                 ? `Sent to ${PEOPLE[request.approverId].name}. Actuals stay as booked until approved and posted in the ERP.`
@@ -94,7 +94,7 @@ function TransactionPanel({ transaction: t }: { transaction: Transaction }) {
           {t.poRef && <Field label="Purchase order">{t.poRef}</Field>}
           {t.invoiceRef && <Field label="Invoice">{t.invoiceRef}</Field>}
           {t.codingSource === "vendor_default" && vendorDefault && (
-            <p className="mt-2 flex items-start gap-2 rounded-md bg-neutral-100 px-3 py-2 text-[13px] text-neutral-800">
+            <p className="mt-2 flex items-start gap-2 rounded-md bg-muted px-3 py-2 text-[13px] text-muted-foreground">
               <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
               <span>
                 Coded automatically: {t.vendor} defaults to {DEPARTMENTS[vendorDefault.deptId].name} · {vendorDefault.accountCode} since{" "}
@@ -107,25 +107,25 @@ function TransactionPanel({ transaction: t }: { transaction: Transaction }) {
 
         {po && (
           <Section title="Suggested match">
-            <div className="rounded-md border border-neutral-900 px-4 py-3">
+            <div className="rounded-xl border border-brand/30 bg-linear-to-b from-brand-soft/50 to-card px-4 py-3.5 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-[14px] font-semibold">
-                  <Sparkles className="size-4" aria-hidden /> {po.ref}
+                  <Sparkles className="size-4 text-brand" aria-hidden /> {po.ref}
                 </span>
                 <span className="text-[13px] font-medium">{formatEurExact(po.amount)}</span>
               </div>
-              <p className="mt-1 text-[13.5px] text-neutral-800">{po.description}</p>
-              <p className="mt-0.5 text-[13px] text-neutral-600">
+              <p className="mt-1 text-[13.5px] text-muted-foreground">{po.description}</p>
+              <p className="mt-0.5 text-[13px] text-muted-foreground">
                 Raised by {PEOPLE[po.requesterId].name}, {PEOPLE[po.requesterId].role} · {dateFmt.format(new Date(po.raisedOn))}
               </p>
               <div className="mt-3 flex items-center gap-2 text-[13.5px]">
-                <span className="text-neutral-600 line-through decoration-neutral-400">{deptId ? DEPARTMENTS[deptId].name : "Revenue"}</span>
+                <span className="text-muted-foreground line-through decoration-muted-foreground/50">{deptId ? DEPARTMENTS[deptId].name : "Revenue"}</span>
                 <ArrowRight className="size-3.5" aria-label="should be" />
                 <span className="font-semibold">
                   {DEPARTMENTS[po.deptId].name} · {lineLabel(po.accountCode)}
                 </span>
               </div>
-              <ul className="mt-3 space-y-1 text-[13px] text-neutral-800">
+              <ul className="mt-3 space-y-1 text-[13px] text-muted-foreground">
                 {["Same vendor", "Exact amount", ...po.matchNotes].map((r) => (
                   <li key={r} className="flex items-center gap-2">
                     <Check className="size-3.5" aria-hidden /> {r}
@@ -136,7 +136,7 @@ function TransactionPanel({ transaction: t }: { transaction: Transaction }) {
                 <Button onClick={() => setReclassOpen(true)} disabled={pending} className="h-9 px-4">
                   {pending ? "Reclassification requested" : request ? "Continue draft" : "Request reclassification"}
                 </Button>
-                <span className="text-[12.5px] text-neutral-500">Goes to an approver. Actuals don’t change until then.</span>
+                <span className="text-[12.5px] text-muted-foreground">Goes to an approver. Actuals don’t change until then.</span>
               </div>
             </div>
           </Section>
@@ -161,13 +161,13 @@ function TransactionPanel({ transaction: t }: { transaction: Transaction }) {
         <Separator />
 
         <Section title="Activity">
-          <ol className="space-y-1.5 text-[13px] text-neutral-700">
+          <ol className="space-y-1.5 text-[13px] text-muted-foreground">
             <li>Imported from ERP · today 06:00</li>
             <li>
               Coded to {currentCoding} by {CODING_SOURCE_LABEL[t.codingSource].toLowerCase()}
             </li>
             {request?.submittedAt && (
-              <li className="font-medium text-neutral-950">
+              <li className="font-medium text-foreground">
                 {request.id} submitted by {PEOPLE[request.requesterId].name} to {PEOPLE[request.approverId].name} · just now
               </li>
             )}

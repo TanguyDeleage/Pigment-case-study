@@ -1,12 +1,13 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { MousePointerClick } from "lucide-react"
+import { Landmark, MousePointerClick, Receipt, Wallet } from "lucide-react"
 import { DEPARTMENTS, LEDGER, MONTHS, MONTH_NAMES, type DepartmentId } from "@/lib/data"
 import { CURRENT_MONTH, YEAR, ytdLabel } from "@/lib/data/calendar"
 import { buildVarianceTree, kpis, linesOf, monthlySeries, operatingResultBridge, type WaterfallStep } from "@/lib/finance/aggregate"
 import { ChartLegend, MonthlyBars } from "@/components/charts/monthly-bars"
 import { Waterfall, WaterfallLegend } from "@/components/charts/waterfall"
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { FilterBar } from "./filter-bar"
 import { KpiTile } from "./kpi-tile"
 import { VarianceTable, type TableFocus } from "./variance-table"
@@ -27,8 +28,8 @@ export function DashboardView() {
     [],
   )
 
-  const periodLabel = `${MONTHS[month]} ${YEAR} · AC provisional`
-  const ytd = ytdLabel(month).replace("YTD ", "YTD ")
+  const periodLabel = `${MONTHS[month]} ${YEAR}`
+  const ytd = ytdLabel(month)
 
   const selectStep = (step: WaterfallStep) => {
     if (focus?.key === step.key) return setFocus(null)
@@ -45,24 +46,22 @@ export function DashboardView() {
     <>
       <FilterBar costCentre={costCentre} onCostCentreChange={selectCostCentre} />
 
-      <div className="grid grid-cols-3 gap-5">
-        <KpiTile title="Revenue" periodLabel={periodLabel} ytdLabel={ytd} figures={data.kpis.revenue} lineType="revenue" />
-        <KpiTile title="Opex" periodLabel={periodLabel} ytdLabel={ytd} figures={data.kpis.opex} lineType="expense" />
-        <KpiTile title="Operating result" periodLabel={periodLabel} ytdLabel={ytd} figures={data.kpis.result} lineType="revenue" />
+      <div className="grid grid-cols-3 gap-4">
+        <KpiTile title="Revenue" icon={Landmark} periodLabel={periodLabel} ytdLabel={ytd} figures={data.kpis.revenue} lineType="revenue" />
+        <KpiTile title="Opex" icon={Receipt} periodLabel={periodLabel} ytdLabel={ytd} figures={data.kpis.opex} lineType="expense" />
+        <KpiTile title="Operating result" icon={Wallet} periodLabel={periodLabel} ytdLabel={ytd} figures={data.kpis.result} lineType="revenue" />
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-5">
-        <section className="flex flex-col rounded-md border bg-white px-5 pt-4 pb-4" aria-labelledby="monthly-title">
-          <div className="mb-2 flex items-start justify-between gap-4">
-            <div>
-              <h2 id="monthly-title" className="text-[16px] font-semibold text-neutral-950">
-                Revenue and opex by month, actuals vs budget
-              </h2>
-              <p className="text-[13px] text-neutral-600">{YEAR} · €M · Δ = AC − BU</p>
-            </div>
-            <ChartLegend />
-          </div>
-          <div className="flex-1">
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="shadow-xs" aria-labelledby="monthly-title">
+          <CardHeader>
+            <CardTitle id="monthly-title">Revenue and opex by month</CardTitle>
+            <CardDescription>Actuals vs budget · {YEAR} · €M · Δ = AC − BU</CardDescription>
+            <CardAction>
+              <ChartLegend />
+            </CardAction>
+          </CardHeader>
+          <CardContent className="flex-1">
             <MonthlyBars
               unit="M"
               ariaLabel="Monthly revenue and opex, actual versus budget, 2026"
@@ -71,35 +70,31 @@ export function DashboardView() {
                 { label: "Opex", lineType: "expense", series: data.opexSeries },
               ]}
             />
-          </div>
-          <p className="mt-2 text-[13px] text-neutral-700">
+          </CardContent>
+          <CardFooter className="py-3 text-xs text-muted-foreground">
             Selected month: {MONTH_NAMES[month]} (provisional). Nov–Dec: budget only, no actuals yet.
-          </p>
-        </section>
+          </CardFooter>
+        </Card>
 
-        <section className="flex flex-col rounded-md border bg-white px-5 pt-4 pb-4" aria-labelledby="bridge-title">
-          <div className="mb-2 flex items-start justify-between gap-4">
-            <div>
-              <h2 id="bridge-title" className="text-[16px] font-semibold text-neutral-950">
-                {MONTH_NAMES[month]} operating result: budget to actual, by department
-              </h2>
-              <p className="text-[13px] text-neutral-600">€k · axis broken on total bars · % = department spend vs BU</p>
-            </div>
-            <WaterfallLegend />
-          </div>
-          <div className="flex-1">
+        <Card className="shadow-xs" aria-labelledby="bridge-title">
+          <CardHeader>
+            <CardTitle id="bridge-title">{MONTH_NAMES[month]} operating result bridge</CardTitle>
+            <CardDescription>Budget to actual by department · €k · % = spend vs BU</CardDescription>
+            <CardAction>
+              <WaterfallLegend />
+            </CardAction>
+          </CardHeader>
+          <CardContent className="flex-1">
             <Waterfall steps={data.bridge} selectedKey={focus?.key ?? null} onSelect={selectStep} />
-          </div>
-          <p className="mt-3 flex items-center gap-2 text-[13px] text-neutral-700">
-            <MousePointerClick className="size-4" aria-hidden /> Click a bar to filter the table
-            <span className="ml-auto text-neutral-500">Grey: no line needs attention</span>
-          </p>
-        </section>
+          </CardContent>
+          <CardFooter className="gap-2 py-3 text-xs text-muted-foreground">
+            <MousePointerClick className="size-3.5" aria-hidden /> Click a bar to filter the table
+            <span className="ml-auto">Grey: no line needs attention</span>
+          </CardFooter>
+        </Card>
       </div>
 
-      <div className="mt-5">
-        <VarianceTable rows={data.tree} month={month} focus={focus} onClearFocus={() => setFocus(null)} />
-      </div>
+      <VarianceTable rows={data.tree} month={month} focus={focus} onClearFocus={() => setFocus(null)} />
     </>
   )
 }

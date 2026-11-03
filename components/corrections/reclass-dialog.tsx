@@ -131,15 +131,15 @@ function ReclassForm({ onOpenChange, transaction: t, suggestion, existing, ledge
         <div className="space-y-5 border-r px-6 py-5">
           <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
             <div>
-              <div className="mb-1.5 text-[12.5px] font-medium text-neutral-600">From</div>
-              <div className="rounded-md border bg-neutral-50 px-3 py-2 text-[13.5px]">
+              <div className="mb-1.5 text-[12.5px] font-medium text-muted-foreground">From</div>
+              <div className="rounded-lg border bg-muted px-3 py-2 text-[13.5px]">
                 <div className="font-semibold">{DEPARTMENTS[from.deptId].name}</div>
-                <div className="text-neutral-600">{lineLabel(from.accountCode)}</div>
+                <div className="text-muted-foreground">{lineLabel(from.accountCode)}</div>
               </div>
             </div>
-            <ArrowRight className="mt-9 size-4 text-neutral-500" aria-hidden />
+            <ArrowRight className="mt-9 size-4 text-muted-foreground" aria-hidden />
             <div className="space-y-2">
-              <div className="text-[12.5px] font-medium text-neutral-600">To</div>
+              <div className="text-[12.5px] font-medium text-muted-foreground">To</div>
               <Select
                 value={toDept}
                 onValueChange={(v) => {
@@ -175,16 +175,16 @@ function ReclassForm({ onOpenChange, transaction: t, suggestion, existing, ledge
             </div>
           </div>
           {suggestion && toDept === suggestion.deptId && toAccount === suggestion.accountCode && (
-            <p className="-mt-2 text-[12.5px] text-neutral-500">Pre-filled from {suggestion.poRef}.</p>
+            <p className="-mt-2 text-[12.5px] text-muted-foreground">Pre-filled from {suggestion.poRef}.</p>
           )}
           {touched && errors.to && <p className="-mt-2 text-[12.5px] text-unfav">{errors.to}</p>}
 
           <div>
-            <Label htmlFor="reclass-amount" className="mb-1.5 text-[12.5px] text-neutral-600">
+            <Label htmlFor="reclass-amount" className="mb-1.5 text-[12.5px] text-muted-foreground">
               Amount
             </Label>
             <div className="relative w-48">
-              <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500">€</span>
+              <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">€</span>
               <Input
                 id="reclass-amount"
                 inputMode="decimal"
@@ -194,21 +194,21 @@ function ReclassForm({ onOpenChange, transaction: t, suggestion, existing, ledge
                 className="pl-7"
               />
             </div>
-            <p className="mt-1 text-[12.5px] text-neutral-500">
+            <p className="mt-1 text-[12.5px] text-muted-foreground">
               {touched && errors.amount ? <span className="text-unfav">{errors.amount}</span> : `Full transaction: ${formatEurExact(t.amount)}`}
             </p>
           </div>
 
           <fieldset>
-            <legend className="mb-2 text-[12.5px] font-medium text-neutral-600">Reason</legend>
+            <legend className="mb-2 text-[12.5px] font-medium text-muted-foreground">Reason</legend>
             <RadioGroup value={reason} onValueChange={(v) => setReason(v as ReasonType)} className="grid grid-cols-2 gap-2">
               {(Object.keys(REASON_LABEL) as ReasonType[]).map((r) => (
                 <Label
                   key={r}
                   htmlFor={`reason-${r}`}
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-[13.5px] font-normal",
-                    reason === r && "border-neutral-900 bg-neutral-50",
+                    "flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-[13.5px] font-normal",
+                    reason === r && "border-brand/50 bg-brand-soft/50 ring-1 ring-brand/30",
                   )}
                 >
                   <RadioGroupItem id={`reason-${r}`} value={r} />
@@ -220,8 +220,8 @@ function ReclassForm({ onOpenChange, transaction: t, suggestion, existing, ledge
 
           <div>
             <div className="mb-1.5 flex items-baseline justify-between">
-              <Label htmlFor="reclass-comment" className="text-[12.5px] text-neutral-600">
-                Explanation for the approver <span className="text-neutral-400">(required)</span>
+              <Label htmlFor="reclass-comment" className="text-[12.5px] text-muted-foreground">
+                Explanation for the approver <span className="text-muted-foreground">(required)</span>
               </Label>
               {suggestedComment && comment !== suggestedComment && (
                 <button type="button" onClick={() => setComment(suggestedComment)} className="text-[12.5px] font-medium underline underline-offset-4">
@@ -241,7 +241,7 @@ function ReclassForm({ onOpenChange, transaction: t, suggestion, existing, ledge
           </div>
 
           <fieldset>
-            <legend className="mb-2 text-[12.5px] font-medium text-neutral-600">Evidence</legend>
+            <legend className="mb-2 text-[12.5px] font-medium text-muted-foreground">Evidence</legend>
             <div className="space-y-2">
               {t.attachment && (
                 <Label className="flex items-center gap-2.5 text-[13.5px] font-normal">
@@ -258,7 +258,7 @@ function ReclassForm({ onOpenChange, transaction: t, suggestion, existing, ledge
               <Button
                 variant="ghost"
                 size="sm"
-                className="-ml-2 text-neutral-700"
+                className="-ml-2 text-muted-foreground"
                 onClick={() => toast("File upload isn’t part of this prototype")}
               >
                 <Paperclip /> Attach another file
@@ -267,31 +267,31 @@ function ReclassForm({ onOpenChange, transaction: t, suggestion, existing, ledge
           </fieldset>
         </div>
 
-        <div className="space-y-5 bg-neutral-50/60 px-6 py-5">
+        <div className="space-y-5 bg-muted/40 px-6 py-5">
           <section aria-labelledby="impact-title">
             <h3 id="impact-title" className="text-[14px] font-semibold">
               Impact on October variance
             </h3>
-            <p className="text-[12.5px] text-neutral-500">Projected once posted. Actuals today stay as booked.</p>
-            {impact.length ? <ImpactTable rows={impact} /> : <p className="mt-3 text-[13px] text-neutral-500">Complete the destination and amount to see the impact.</p>}
-            <p className="mt-3 text-[12.5px] text-neutral-600">
+            <p className="text-[12.5px] text-muted-foreground">Projected once posted. Actuals today stay as booked.</p>
+            {impact.length ? <ImpactTable rows={impact} /> : <p className="mt-3 text-[13px] text-muted-foreground">Complete the destination and amount to see the impact.</p>}
+            <p className="mt-3 text-[12.5px] text-muted-foreground">
               Company opex and operating result don’t change: only the split between cost centres moves.
             </p>
           </section>
 
-          <section aria-labelledby="route-title" className="rounded-md border bg-white px-4 py-3">
+          <section aria-labelledby="route-title" className="rounded-lg border bg-card px-4 py-3">
             <h3 id="route-title" className="text-[14px] font-semibold">
               Approval
             </h3>
             <div className="mt-2 flex items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-full bg-neutral-200 text-[12px] font-semibold">{approver.initials}</span>
+              <span className="flex size-8 items-center justify-center rounded-full bg-muted text-[12px] font-semibold">{approver.initials}</span>
               <div>
                 <div className="text-[13.5px] font-semibold">{approver.name}</div>
-                <div className="text-[12.5px] text-neutral-600">{approver.role}</div>
+                <div className="text-[12.5px] text-muted-foreground">{approver.role}</div>
               </div>
             </div>
-            <p className="mt-2 text-[12.5px] text-neutral-600">{route.rule}</p>
-            <p className="mt-1 text-[12.5px] text-neutral-600">
+            <p className="mt-2 text-[12.5px] text-muted-foreground">{route.rule}</p>
+            <p className="mt-1 text-[12.5px] text-muted-foreground">
               Maker-checker: as the requester, {PEOPLE[CURRENT_USER].name} can’t approve this request.
             </p>
           </section>
@@ -299,7 +299,7 @@ function ReclassForm({ onOpenChange, transaction: t, suggestion, existing, ledge
       </div>
 
       <DialogFooter className="mx-0 mb-0 items-center rounded-b-xl px-6 py-3.5">
-        <span className="mr-auto text-[12.5px] text-neutral-500">{existing ? `${existing.id} · draft` : "New request"}</span>
+        <span className="mr-auto text-[12.5px] text-muted-foreground">{existing ? `${existing.id} · draft` : "New request"}</span>
         <Button variant="ghost" onClick={() => onOpenChange(false)}>
           Cancel
         </Button>
@@ -323,7 +323,7 @@ function VarCell({ amounts, attention }: { amounts: { actual: number; budget: nu
       <div className={cn("font-semibold", attention && (fav ? "text-fav" : "text-unfav"))}>
         {formatEur(v, { unit: "k", decimals, signed: true })} <span className="font-normal">{formatPct(variancePct(amounts.actual, amounts.budget))}</span>
       </div>
-      <div className="flex items-center justify-end gap-1 text-[11.5px] text-neutral-600">
+      <div className="flex items-center justify-end gap-1 text-[11.5px] text-muted-foreground">
         {attention ? (
           <>
             <Flag className="size-3 fill-current" aria-hidden /> {fav ? "Fav" : "Unfav"} · needs attention
@@ -342,7 +342,7 @@ function ImpactTable({ rows }: { rows: ImpactRow[] }) {
   return (
     <table className="mt-3 w-full text-[13px]">
       <thead>
-        <tr className="border-b text-[12px] text-neutral-500">
+        <tr className="border-b text-[12px] text-muted-foreground">
           <th className="py-1.5 text-left font-medium">Line · October</th>
           <th className="py-1.5 text-right font-medium">Var before</th>
           <th className="py-1.5 text-right font-medium">Var after</th>
@@ -350,10 +350,10 @@ function ImpactTable({ rows }: { rows: ImpactRow[] }) {
       </thead>
       <tbody>
         {rows.map((r) => (
-          <tr key={r.key} className={cn("border-b last:border-b-0", r.scope === "department" && "text-neutral-700")}>
+          <tr key={r.key} className={cn("border-b last:border-b-0", r.scope === "department" && "text-muted-foreground")}>
             <td className="py-2 pr-2 align-top">
               <div className="font-medium">{DEPARTMENTS[r.coding.deptId].name}</div>
-              <div className="text-[12px] text-neutral-500">{r.scope === "line" ? lineLabel(r.coding.accountCode) : "Department total"}</div>
+              <div className="text-[12px] text-muted-foreground">{r.scope === "line" ? lineLabel(r.coding.accountCode) : "Department total"}</div>
             </td>
             <td className="py-2 align-top">
               <VarCell amounts={r.before} attention={r.attentionBefore} />

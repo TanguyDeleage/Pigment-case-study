@@ -8,6 +8,7 @@ import { vendorBreakdown } from "@/lib/finance/aggregate"
 import { formatEur } from "@/lib/finance/format"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 interface VendorBreakdownProps {
@@ -25,19 +26,19 @@ export function VendorBreakdown({ lineId, history, onOpen }: VendorBreakdownProp
   const outliers = history ? rows.filter((r) => r.outlier) : []
 
   return (
-    <section className="rounded-md border bg-white px-5 pt-4 pb-3" aria-labelledby="vendor-title">
-      <div className="mb-3 flex items-start justify-between">
-        <div>
-          <h2 id="vendor-title" className="text-[16px] font-semibold">October spend by vendor</h2>
-          <p className="text-[13px] text-neutral-600">
-            €k · bar = October actual{history ? `, tick = ${closedRange} monthly average` : ""}
-          </p>
-        </div>
-        <div className="text-[13px] text-neutral-700">October total {formatEur(total, { unit: "k", decimals: 1 })}</div>
-      </div>
+    <Card className="gap-0 pb-0 shadow-xs" aria-labelledby="vendor-title">
+      <CardHeader className="pb-4">
+        <CardTitle id="vendor-title">October spend by vendor</CardTitle>
+        <CardDescription>€k · bar = October actual{history ? `, tick = ${closedRange} monthly average` : ""}</CardDescription>
+        <CardAction className="text-right">
+          <div className="text-xs text-muted-foreground">October total</div>
+          <div className="text-lg font-semibold tabular-nums">{formatEur(total, { unit: "k", decimals: 1 })}</div>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="px-0">
 
       {outliers.map((o) => (
-        <div key={o.vendor} className="mb-3 flex items-start gap-2.5 rounded-md border border-unfav/40 bg-unfav-soft px-3.5 py-2.5 text-[13.5px]">
+        <div key={o.vendor} className="mx-4 mb-4 flex items-start gap-2.5 rounded-lg border border-unfav/25 bg-unfav-soft px-3.5 py-2.5 text-[13.5px]">
           <TriangleAlert className="mt-0.5 size-4 shrink-0 text-unfav" aria-hidden />
           <p>
             <span className="font-semibold">{o.vendor}</span> accounts for {formatEur(o.month, { unit: "k", decimals: 1 })} (
@@ -47,9 +48,9 @@ export function VendorBreakdown({ lineId, history, onOpen }: VendorBreakdownProp
         </div>
       ))}
 
-      <Table className="text-[14px]">
+      <Table className="text-[13.5px]">
         <TableHeader>
-          <TableRow className="hover:bg-transparent">
+          <TableRow className="bg-muted/40 text-xs hover:bg-muted/40 [&>th]:h-9 [&>th]:text-muted-foreground [&>th:first-child]:pl-6 [&>th:last-child]:pr-6">
             <TableHead className="w-[26%]">Vendor</TableHead>
             <TableHead className="w-[34%]">October</TableHead>
             {history && <TableHead className="text-right">{closedRange} avg / month</TableHead>}
@@ -68,17 +69,17 @@ export function VendorBreakdown({ lineId, history, onOpen }: VendorBreakdownProp
                 onClick={first ? () => onOpen(first.id) : undefined}
                 onKeyDown={(e) => first && e.key === "Enter" && onOpen(first.id)}
                 className={cn(
-                  "h-12 outline-none",
-                  first && "cursor-pointer hover:bg-neutral-100 focus-visible:bg-neutral-100",
-                  highlight && "bg-unfav-soft/60 shadow-[inset_3px_0_0_var(--unfav)] hover:bg-unfav-soft",
-                  !first && "text-neutral-500",
+                  "h-12 outline-none [&>td:first-child]:pl-6 [&>td:last-child]:pr-6",
+                  first && "cursor-pointer focus-visible:bg-muted/50",
+                  highlight && "bg-unfav-soft/50 shadow-[inset_3px_0_0_var(--unfav)] hover:bg-unfav-soft",
+                  !first && "text-muted-foreground",
                 )}
               >
                 <TableCell className="font-medium">
                   <span className="flex items-center gap-2">
                     {r.vendor}
                     {highlight && (
-                      <Badge variant="outline" className="border-unfav bg-white text-unfav">
+                      <Badge className="bg-unfav-soft text-unfav ring-1 ring-unfav/20">
                         Outlier · {r.outlierReason}
                       </Badge>
                     )}
@@ -86,17 +87,17 @@ export function VendorBreakdown({ lineId, history, onOpen }: VendorBreakdownProp
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <div className="relative h-4 flex-1">
-                      <div className="absolute inset-y-0 left-0 bg-ac" style={{ width: `${(r.month / max) * 100}%` }} />
+                    <div className="relative h-2.5 flex-1 rounded-full bg-muted">
+                      <div className="absolute inset-y-0 left-0 rounded-full bg-ac" style={{ width: `${(r.month / max) * 100}%` }} />
                       {history && r.priorMonthlyAvg > 0 && (
                         <div
-                          className="absolute -inset-y-1 w-0.5 bg-neutral-900"
+                          className="absolute -inset-y-1.5 w-0.5 rounded-full bg-foreground"
                           style={{ left: `${(r.priorMonthlyAvg / max) * 100}%` }}
                           aria-hidden
                         />
                       )}
                     </div>
-                    <span className="w-14 text-right">{r.month ? (r.month / 1000).toFixed(1) : "–"}</span>
+                    <span className="w-14 text-right tabular-nums">{r.month ? (r.month / 1000).toFixed(1) : "–"}</span>
                   </div>
                 </TableCell>
                 {history && <TableCell className="text-right">{r.priorTotal ? (r.priorMonthlyAvg / 1000).toFixed(1) : "–"}</TableCell>}
@@ -107,6 +108,7 @@ export function VendorBreakdown({ lineId, history, onOpen }: VendorBreakdownProp
           })}
         </TableBody>
       </Table>
-    </section>
+      </CardContent>
+    </Card>
   )
 }

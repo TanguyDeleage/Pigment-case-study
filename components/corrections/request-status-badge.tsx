@@ -9,8 +9,8 @@ export function RequestStatusBadge({ status }: { status: CorrectionStatus }) {
       variant="outline"
       className={
         status === "draft"
-          ? "border-neutral-300 bg-white text-neutral-600"
-          : "border-dashed border-neutral-600 bg-white text-neutral-900"
+          ? "text-muted-foreground"
+          : "border-dashed border-amber-500/60 bg-amber-50 text-amber-800"
       }
     >
       <Icon aria-hidden />

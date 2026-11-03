@@ -10,7 +10,7 @@ export const CODING_SOURCE_LABEL: Record<CodingSource, string> = {
 /** Vendor default is the weakest signal: nobody looked at this invoice when it was coded. */
 export function CodingSourceLabel({ source }: { source: CodingSource }) {
   return (
-    <span className={source === "vendor_default" ? "text-neutral-900 underline decoration-dotted underline-offset-4" : "text-neutral-600"}>
+    <span className={source === "vendor_default" ? "text-foreground underline decoration-dotted underline-offset-4" : "text-muted-foreground"}>
       {CODING_SOURCE_LABEL[source]}
     </span>
   )

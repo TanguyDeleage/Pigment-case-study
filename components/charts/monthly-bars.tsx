@@ -56,14 +56,14 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
       <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label={ariaLabel}>
         {provisional >= 0 && (
           <g>
-            <rect x={ML + provisional * cw + 2} y={0} width={cw - 4} height={H - AXIS_H + 6} className="fill-band" />
-            <text x={ML + (provisional + 0.5) * cw} y={10} textAnchor="middle" className="fill-neutral-800 text-[10px] font-semibold tracking-wide">
+            <rect x={ML + provisional * cw + 2} y={0} width={cw - 4} height={H - AXIS_H + 6} className="fill-band" rx={6} />
+            <text x={ML + (provisional + 0.5) * cw} y={10} textAnchor="middle" className="fill-muted-foreground text-[9.5px] font-semibold tracking-wider">
               PROV.
             </text>
           </g>
         )}
         {hover !== null && hover !== provisional && (
-          <rect x={ML + hover * cw + 2} y={0} width={cw - 4} height={H - AXIS_H + 6} className="fill-neutral-100" />
+          <rect x={ML + hover * cw + 2} y={0} width={cw - 4} height={H - AXIS_H + 6} className="fill-muted/70" rx={6} />
         )}
 
         {panels.map((panel, pi) => {
@@ -71,14 +71,14 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
           const base = top + LABEL_H + panelHeight
           return (
             <g key={panel.label}>
-              <text x={0} y={top + 12} className="fill-neutral-900 text-[13px] font-medium">
+              <text x={0} y={top + 12} className="fill-foreground text-[13px] font-medium">
                 {panel.label}
               </text>
-              <line x1={ML - 4} x2={W - MR} y1={base} y2={base} className="stroke-neutral-800" strokeWidth={1} />
-              <text x={ML - 12} y={base + 4} textAnchor="end" className="fill-neutral-600 text-[11px]">
+              <line x1={ML - 4} x2={W - MR} y1={base} y2={base} className="stroke-foreground/20" strokeWidth={1} />
+              <text x={ML - 12} y={base + 4} textAnchor="end" className="fill-muted-foreground text-[11.5px]">
                 0
               </text>
-              <text x={ML - 12} y={base + 19} textAnchor="end" className="fill-neutral-600 text-[11px]">
+              <text x={ML - 12} y={base + 19} textAnchor="end" className="fill-muted-foreground text-[11.5px]">
                 Δ
               </text>
               {panel.series.map((p, i) => {
@@ -95,7 +95,8 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
                       y={base - buH}
                       width={bw}
                       height={buH}
-                      className="fill-white stroke-bu"
+                      rx={1.5}
+                      className="fill-background stroke-bu"
                       strokeWidth={1.2}
                     />
                     {hasActual && (
@@ -104,7 +105,8 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
                         y={base - acH}
                         width={bw}
                         height={acH}
-                        className={p.provisional ? "fill-ac-prov stroke-neutral-800" : "fill-ac"}
+                        rx={1.5}
+                        className={p.provisional ? "fill-ac-prov stroke-ac" : "fill-ac"}
                         strokeDasharray={p.provisional ? "2 2" : undefined}
                         strokeWidth={p.provisional ? 1.2 : 0}
                       />
@@ -113,7 +115,7 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
                       x={cx}
                       y={labelTop}
                       textAnchor="middle"
-                      className={`text-[11.5px] ${hasActual ? "fill-neutral-900" : "fill-neutral-500"} ${p.provisional ? "font-semibold" : ""}`}
+                      className={`text-[12px] ${hasActual ? "fill-foreground" : "fill-muted-foreground/70"} ${p.provisional ? "font-semibold" : ""}`}
                     >
                       {fmt(labelValue)}
                     </text>
@@ -122,7 +124,7 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
                         x={cx}
                         y={base + 19}
                         textAnchor="middle"
-                        className={`fill-neutral-900 text-[11.5px] ${p.provisional ? "font-semibold" : ""}`}
+                        className={`fill-muted-foreground text-[12px] ${p.provisional ? "fill-foreground font-semibold" : ""}`}
                       >
                         {fmtDelta(variance(p.actual as number, p.budget))}
                       </text>
@@ -140,7 +142,7 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
             x={ML + (i + 0.5) * cw}
             y={H - 8}
             textAnchor="middle"
-            className={`text-[11.5px] ${i === provisional ? "fill-neutral-950 font-semibold" : "fill-neutral-700"}`}
+            className={`text-[12px] ${i === provisional ? "fill-foreground font-semibold" : "fill-muted-foreground"}`}
           >
             {m}
           </text>
@@ -162,7 +164,7 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
 
       {hover !== null && (
         <div
-          className="pointer-events-none absolute top-6 z-10 w-56 rounded-md border bg-white p-2.5 text-xs shadow-sm"
+          className="pointer-events-none absolute top-6 z-10 w-56 rounded-lg border bg-popover p-3 text-xs text-popover-foreground shadow-lg"
           style={{
             left: `${((ML + (hover + 0.5) * cw) / W) * 100}%`,
             transform: hover > 7 ? "translateX(calc(-100% - 24px))" : "translateX(24px)",
@@ -176,7 +178,7 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
             const v = p.actual === null ? null : variance(p.actual, p.budget)
             return (
               <div key={panel.label} className="mb-1 last:mb-0">
-                <div className="text-neutral-500">{panel.label}</div>
+                <div className="text-muted-foreground">{panel.label}</div>
                 <div className="flex justify-between">
                   <span>AC {p.actual === null ? "–" : formatEur(p.actual, { unit, decimals: unit === "M" ? 2 : 0 })}</span>
                   <span>BU {formatEur(p.budget, { unit, decimals: unit === "M" ? 2 : 0 })}</span>
@@ -198,15 +200,15 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
 
 export function ChartLegend() {
   return (
-    <div className="flex shrink-0 items-center gap-3 text-[13px] whitespace-nowrap text-neutral-800" aria-label="Legend">
+    <div className="flex shrink-0 items-center gap-3 text-xs whitespace-nowrap text-muted-foreground" aria-label="Legend">
       <span className="flex items-center gap-1.5">
-        <span className="inline-block size-3 bg-ac" aria-hidden /> AC
+        <span className="inline-block size-2.5 rounded-[3px] bg-ac" aria-hidden /> AC
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="inline-block size-3 border border-bu bg-white" aria-hidden /> BU
+        <span className="inline-block size-2.5 rounded-[3px] border border-bu bg-background" aria-hidden /> BU
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="inline-block size-3 border border-dashed border-neutral-800 bg-ac-prov" aria-hidden /> AC provisional
+        <span className="inline-block size-2.5 rounded-[3px] border border-dashed border-ac bg-ac-prov" aria-hidden /> Provisional
       </span>
     </div>
   )

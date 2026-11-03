@@ -24,9 +24,9 @@ export function TransactionsTable({ transactions, onOpen, limit, history }: Tran
   const rows = [...transactions].sort((a, b) => b.amount - a.amount).slice(0, limit)
 
   return (
-    <Table className="text-[14px]">
+    <Table className="text-[13.5px]">
       <TableHeader>
-        <TableRow className="hover:bg-transparent">
+        <TableRow className="bg-muted/40 text-xs hover:bg-muted/40 [&>th]:h-9 [&>th]:text-muted-foreground [&>th:first-child]:pl-6 [&>th:last-child]:pr-6">
           <TableHead className="w-20">Date</TableHead>
           <TableHead>Vendor</TableHead>
           <TableHead>Description</TableHead>
@@ -45,24 +45,24 @@ export function TransactionsTable({ transactions, onOpen, limit, history }: Tran
               tabIndex={0}
               onClick={() => onOpen(t.id)}
               onKeyDown={(e) => e.key === "Enter" && onOpen(t.id)}
-              className={cn("h-11 cursor-pointer outline-none hover:bg-neutral-100 focus-visible:bg-neutral-100")}
+              className={cn("h-12 cursor-pointer outline-none focus-visible:bg-muted/50 [&>td:first-child]:pl-6 [&>td:last-child]:pr-6")}
             >
-              <TableCell className="text-neutral-600">{dateFmt.format(new Date(t.postingDate))}</TableCell>
+              <TableCell className="text-muted-foreground tabular-nums">{dateFmt.format(new Date(t.postingDate))}</TableCell>
               <TableCell className="font-medium">
                 <span className="flex items-center gap-2">
                   {t.vendor}
                   {isNew && (
-                    <Badge variant="outline" className="border-unfav text-unfav">
+                    <Badge className="bg-unfav-soft text-unfav">
                       New vendor
                     </Badge>
                   )}
                 </span>
               </TableCell>
-              <TableCell className="max-w-72 truncate text-neutral-700">{t.description}</TableCell>
+              <TableCell className="max-w-72 truncate text-muted-foreground">{t.description}</TableCell>
               <TableCell>
                 <CodingSourceLabel source={t.codingSource} />
               </TableCell>
-              <TableCell className="text-right font-medium">{formatEurExact(t.amount)}</TableCell>
+              <TableCell className="text-right font-medium tabular-nums">{formatEurExact(t.amount)}</TableCell>
               <TableCell>{request && <RequestStatusBadge status={request.status} />}</TableCell>
             </TableRow>
           )

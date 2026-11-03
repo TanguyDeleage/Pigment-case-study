@@ -63,7 +63,7 @@ export function Waterfall({ steps, selectedKey, onSelect }: WaterfallProps) {
   return (
     <div>
       <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label="Operating result bridge from budget to actual by department">
-        <line x1={ML} x2={W - MR} y1={base} y2={base} className="stroke-neutral-800" />
+        <line x1={ML} x2={W - MR} y1={base} y2={base} className="stroke-foreground/20" />
         {steps.map((s, i) => {
           const cw = weights[i] * unit
           const cx = colX[i] + cw / 2
@@ -78,7 +78,7 @@ export function Waterfall({ steps, selectedKey, onSelect }: WaterfallProps) {
                 x2={colX[i + 1] + (weights[i + 1] * unit - bw) / 2}
                 y1={y(to)}
                 y2={y(to)}
-                className="stroke-neutral-500"
+                className="stroke-foreground/30"
                 strokeDasharray="3 3"
               />
             ) : null
@@ -95,21 +95,22 @@ export function Waterfall({ steps, selectedKey, onSelect }: WaterfallProps) {
                   y={top}
                   width={bw}
                   height={base - top}
-                  className={isActual ? "fill-ac" : "fill-white stroke-bu"}
+                  rx={2}
+                  className={isActual ? "fill-ac" : "fill-background stroke-bu"}
                   strokeWidth={isActual ? 0 : 1.4}
                 />
                 {isActual && (
-                  <rect x={x - 3} y={top - 3} width={bw + 6} height={base - top + 3} fill="none" className="stroke-neutral-800" strokeDasharray="2 2" />
+                  <rect x={x - 3} y={top - 3} width={bw + 6} height={base - top + 3} rx={4} fill="none" className="stroke-ac" strokeDasharray="2 2" />
                 )}
                 {/* broken-axis marks */}
-                <path d={`M${x - 5} ${breakY + 4} L${x + bw + 5} ${breakY - 6}`} className="stroke-white" strokeWidth={6} />
-                <path d={`M${x - 5} ${breakY + 1} L${x + bw + 5} ${breakY - 9}`} className="stroke-neutral-800" strokeWidth={1.2} />
-                <path d={`M${x - 5} ${breakY + 7} L${x + bw + 5} ${breakY - 3}`} className="stroke-neutral-800" strokeWidth={1.2} />
-                <text x={cx} y={top - (isActual ? 24 : 10)} textAnchor="middle" className="fill-neutral-950 text-[14px] font-semibold">
+                <path d={`M${x - 5} ${breakY + 4} L${x + bw + 5} ${breakY - 6}`} className="stroke-card" strokeWidth={6} />
+                <path d={`M${x - 5} ${breakY + 1} L${x + bw + 5} ${breakY - 9}`} className="stroke-bu" strokeWidth={1.2} />
+                <path d={`M${x - 5} ${breakY + 7} L${x + bw + 5} ${breakY - 3}`} className="stroke-bu" strokeWidth={1.2} />
+                <text x={cx} y={top - (isActual ? 24 : 10)} textAnchor="middle" className="fill-foreground text-[14px] font-semibold">
                   {k(s.value)}
                 </text>
                 {isActual && (
-                  <text x={cx} y={top - 9} textAnchor="middle" className="fill-neutral-900 text-[12px]">
+                  <text x={cx} y={top - 9} textAnchor="middle" className="fill-muted-foreground text-[12.5px]">
                     {signedK(s.value - levels[0].to)} · {formatPct(s.pct)} {(s.pct ?? 0) >= 0 ? "Fav" : "Unfav"}
                   </text>
                 )}
@@ -135,19 +136,19 @@ export function Waterfall({ steps, selectedKey, onSelect }: WaterfallProps) {
               className={cn("cursor-pointer outline-none transition-opacity focus-visible:opacity-80", dimmed && "opacity-35")}
             >
               <rect x={colX[i]} y={0} width={cw} height={H} fill="transparent" />
-              <rect x={x} y={yTop} width={bw} height={height} className={fillFor(s)} />
+              <rect x={x} y={yTop} width={bw} height={height} rx={2} className={fillFor(s)} />
               {selectedKey === s.key && (
-                <rect x={x - 3} y={yTop - 3} width={bw + 6} height={height + 6} fill="none" className="stroke-neutral-900" strokeWidth={1.5} />
+                <rect x={x - 3} y={yTop - 3} width={bw + 6} height={height + 6} rx={4} fill="none" className="stroke-foreground" strokeWidth={1.5} />
               )}
               <text
                 x={cx}
                 y={labelAbove ? yTop - 22 : yBottom + 16}
                 textAnchor="middle"
-                className="fill-neutral-950 text-[12.5px] font-semibold"
+                className="fill-foreground text-[13px] font-semibold"
               >
                 {signedK(s.value)} {fav ? "Fav" : "Unfav"}
               </text>
-              <text x={cx} y={labelAbove ? yTop - 8 : yBottom + 30} textAnchor="middle" className="fill-neutral-800 text-[12px]">
+              <text x={cx} y={labelAbove ? yTop - 8 : yBottom + 30} textAnchor="middle" className="fill-muted-foreground text-[12.5px]">
                 {pctText}
               </text>
               {connector}
@@ -164,24 +165,22 @@ export function Waterfall({ steps, selectedKey, onSelect }: WaterfallProps) {
               disabled={s.kind !== "delta"}
               onClick={() => onSelect(s)}
               className={cn(
-                "rounded-sm text-[13.5px] leading-tight outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-default",
-                s.kind !== "delta" || s.attentionCount > 0 ? "font-semibold text-neutral-950" : "text-neutral-700",
+                "rounded-sm text-[13px] leading-tight outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-default",
+                s.kind !== "delta" || s.attentionCount > 0 ? "font-medium text-foreground" : "text-muted-foreground",
               )}
             >
               {s.label}
             </button>
-            {s.sublabel && <span className="text-[12px] text-neutral-600">{s.sublabel}</span>}
+            {s.sublabel && <span className="text-xs text-muted-foreground">{s.sublabel}</span>}
             {s.kind === "delta" && s.attentionCount > 0 && (
               <button
                 type="button"
                 onClick={() => onSelect(s)}
-                className="mt-1.5 rounded-[4px] border border-neutral-800 bg-white px-1 py-0.5 text-[10px] leading-tight font-semibold whitespace-nowrap text-neutral-900 hover:bg-neutral-50"
+                className="mt-1.5 flex items-center gap-1 rounded-full bg-unfav-soft px-2 py-0.5 text-[10.5px] font-medium whitespace-nowrap text-unfav hover:bg-unfav-soft/70"
+                aria-label={`${s.attentionCount} line${s.attentionCount > 1 ? "s" : ""} ${s.attentionCount > 1 ? "need" : "needs"} attention`}
               >
-                <span className="flex items-center justify-center gap-1">
-                  <Flag className="size-2.5 shrink-0 fill-current" aria-hidden />
-                  {s.attentionCount} line{s.attentionCount > 1 ? "s" : ""}
-                </span>
-                <span className="block">{s.attentionCount > 1 ? "need" : "needs"} attention</span>
+                <Flag className="size-2.5 shrink-0 fill-current" aria-hidden />
+                {s.attentionCount} to review
               </button>
             )}
           </div>
@@ -193,12 +192,12 @@ export function Waterfall({ steps, selectedKey, onSelect }: WaterfallProps) {
 
 export function WaterfallLegend() {
   return (
-    <div className="flex shrink-0 items-center gap-3 text-[13px] whitespace-nowrap text-neutral-800" aria-label="Legend">
-      <span className="flex items-center gap-1">
-        <span className="inline-block size-3 bg-fav" aria-hidden />▲ Fav
+    <div className="flex shrink-0 items-center gap-3 text-xs whitespace-nowrap text-muted-foreground" aria-label="Legend">
+      <span className="flex items-center gap-1.5">
+        <span className="inline-block size-2.5 rounded-[3px] bg-fav" aria-hidden />Fav
       </span>
-      <span className="flex items-center gap-1">
-        <span className="inline-block size-3 bg-unfav" aria-hidden />▼ Unfav
+      <span className="flex items-center gap-1.5">
+        <span className="inline-block size-2.5 rounded-[3px] bg-unfav" aria-hidden />Unfav
       </span>
     </div>
   )

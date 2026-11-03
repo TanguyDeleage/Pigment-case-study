@@ -1,9 +1,8 @@
 import { Suspense } from "react"
-import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ChevronRight } from "lucide-react"
 import { DEPARTMENTS, LEDGER, lineId, lineLabel, type DepartmentId } from "@/lib/data"
-import { PageHeader } from "@/components/shell/page-header"
+import { PageContent, PageHeader } from "@/components/shell/page-header"
+import { Skeleton } from "@/components/ui/skeleton"
 import { VarianceDetail } from "@/components/variance/variance-detail"
 
 export function generateStaticParams() {
@@ -14,7 +13,7 @@ type Params = Promise<{ dept: string; account: string }>
 
 export default function VariancePage({ params }: { params: Params }) {
   return (
-    <Suspense fallback={<div className="h-[900px] rounded-md border bg-white" />}>
+    <Suspense fallback={<Skeleton className="m-6 h-[900px] rounded-xl" />}>
       <VarianceContent params={params} />
     </Suspense>
   )
@@ -30,24 +29,17 @@ async function VarianceContent({ params }: { params: Params }) {
   return (
     <>
       <PageHeader
-        eyebrow={
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1">
-            <Link href="/" className="underline-offset-4 hover:underline">
-              Budget vs Actuals
-            </Link>
-            <ChevronRight className="size-3.5" aria-hidden />
-            <span>{owner}</span>
-            <ChevronRight className="size-3.5" aria-hidden />
-            <span>Variance detail</span>
-          </nav>
-        }
+        crumbs={[{ label: "Budget vs Actuals", href: "/" }, { label: owner }, { label: lineLabel(account) }]}
         title={
           <>
-            {lineLabel(account)} <span className="font-normal text-neutral-500">· {owner}</span>
+            {lineLabel(account)} <span className="font-normal text-muted-foreground">· {owner}</span>
           </>
         }
+        description="Variance investigation: check the budget, then trace the actuals to vendors and transactions."
       />
-      <VarianceDetail lineId={id} />
+      <PageContent>
+        <VarianceDetail lineId={id} />
+      </PageContent>
     </>
   )
 }

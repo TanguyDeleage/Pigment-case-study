@@ -5,6 +5,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { DEPARTMENTS, LEDGER, PEOPLE, VENDOR_HISTORY } from "@/lib/data"
 import { CURRENT_MONTH } from "@/lib/data/calendar"
 import { findLine, lineFigures, monthlySeries, transactionsForLine } from "@/lib/finance/aggregate"
+import { Button } from "@/components/ui/button"
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChartLegend, MonthlyBars } from "@/components/charts/monthly-bars"
 import { TransactionSheet } from "@/components/transaction/transaction-sheet"
@@ -48,47 +50,53 @@ export function VarianceDetail({ lineId }: { lineId: string }) {
     <>
       <SummaryStrip line={line} figures={figures} month={month} owner={owner} />
 
-      <Tabs value={tab} onValueChange={(v) => setParams({ tab: v === "overview" ? null : v })} className="mt-5 gap-4">
-        <TabsList variant="line" className="h-10 border-b w-full justify-start rounded-none p-0">
-          <TabsTrigger value="overview" className="px-4 text-[14px]">Overview</TabsTrigger>
-          <TabsTrigger value="vendors" className="px-4 text-[14px]">By vendor</TabsTrigger>
-          <TabsTrigger value="transactions" className="px-4 text-[14px]">
-            Transactions <span className="text-neutral-500">({transactions.length})</span>
+      <Tabs value={tab} onValueChange={(v) => setParams({ tab: v === "overview" ? null : v })} className="gap-4">
+        <TabsList>
+          <TabsTrigger value="overview" className="px-3">Overview</TabsTrigger>
+          <TabsTrigger value="vendors" className="px-3">By vendor</TabsTrigger>
+          <TabsTrigger value="transactions" className="px-3">
+            Transactions
+            <span className="rounded-full bg-muted px-1.5 text-[11px] text-muted-foreground tabular-nums">{transactions.length}</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-5">
-          <div className="grid grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] gap-5">
-            <section className="rounded-md border bg-white px-5 pt-4 pb-4" aria-labelledby="phasing-title">
-              <div className="mb-2 flex items-start justify-between">
-                <div>
-                  <h2 id="phasing-title" className="text-[16px] font-semibold">Monthly actuals vs phased budget</h2>
-                  <p className="text-[13px] text-neutral-600">2026 · €k · Δ = AC − BU</p>
-                </div>
-                <ChartLegend />
-              </div>
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] gap-4">
+            <Card className="shadow-xs" aria-labelledby="phasing-title">
+              <CardHeader>
+                <CardTitle id="phasing-title">Monthly actuals vs phased budget</CardTitle>
+                <CardDescription>2026 · €k · Δ = AC − BU</CardDescription>
+                <CardAction>
+                  <ChartLegend />
+                </CardAction>
+              </CardHeader>
+              <CardContent>
               <MonthlyBars
                 unit="k"
-                panelHeight={200}
+                panelHeight={330}
                 ariaLabel="Monthly actuals versus phased budget for this line"
                 panels={[{ label: "", lineType: line.lineType, series }]}
               />
-            </section>
-            <div className="space-y-5">
+              </CardContent>
+            </Card>
+            <div className="space-y-4">
               <BudgetCheck lineId={lineId} series={series} month={month} />
               <RelatedVarianceHint lineId={lineId} month={month} />
             </div>
           </div>
 
-          <section className="rounded-md border bg-white px-5 pt-4 pb-3" aria-labelledby="largest-title">
-            <div className="mb-2 flex items-baseline justify-between">
-              <h2 id="largest-title" className="text-[16px] font-semibold">Largest October transactions</h2>
-              <button type="button" onClick={() => setParams({ tab: "transactions" })} className="text-[13px] font-medium underline underline-offset-4">
-                See all {transactions.length}
-              </button>
-            </div>
+          <Card className="gap-0 pb-0 shadow-xs" aria-labelledby="largest-title">
+            <CardHeader className="pb-3">
+              <CardTitle id="largest-title">Largest October transactions</CardTitle>
+              <CardDescription>Click a row to open the transaction and its coding</CardDescription>
+              <CardAction>
+                <Button variant="outline" size="sm" onClick={() => setParams({ tab: "transactions" })}>
+                  See all {transactions.length}
+                </Button>
+              </CardAction>
+            </CardHeader>
             <TransactionsTable transactions={transactions} limit={4} onOpen={openTx} history={VENDOR_HISTORY[lineId]} />
-          </section>
+          </Card>
         </TabsContent>
 
         <TabsContent value="vendors">
@@ -96,10 +104,13 @@ export function VarianceDetail({ lineId }: { lineId: string }) {
         </TabsContent>
 
         <TabsContent value="transactions">
-          <section className="rounded-md border bg-white px-5 pt-4 pb-3">
-            <h2 className="mb-2 text-[16px] font-semibold">October transactions · provisional</h2>
+          <Card className="gap-0 pb-0 shadow-xs">
+            <CardHeader className="pb-3">
+              <CardTitle>October transactions</CardTitle>
+              <CardDescription>Provisional until the month closes</CardDescription>
+            </CardHeader>
             <TransactionsTable transactions={transactions} onOpen={openTx} history={VENDOR_HISTORY[lineId]} />
-          </section>
+          </Card>
         </TabsContent>
       </Tabs>
 

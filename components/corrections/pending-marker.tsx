@@ -25,7 +25,7 @@ export function PendingMarker({ lineId, className }: { lineId: string; className
         <span
           tabIndex={0}
           className={cn(
-            "inline-flex h-[22px] items-center gap-1 rounded-full border border-dashed border-neutral-600 bg-white px-2 text-[12px] font-medium whitespace-nowrap text-neutral-900",
+            "inline-flex h-5 items-center gap-1 rounded-full border border-dashed border-amber-500/60 bg-amber-50 px-2 text-xs font-medium whitespace-nowrap text-amber-800",
             className,
           )}
         >
