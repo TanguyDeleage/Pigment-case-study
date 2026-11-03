@@ -178,7 +178,9 @@ export const MARKETING_6233_VENDOR_HISTORY: Record<string, number> = {
   "Pixel Print Co": 160_000,
   "Studio Lumen": 120_000,
   "Event Ticketing Ltd": 95_000,
-  "Other vendors (12)": 125_000,
+  // Paris SaaS Expo stand in March: Atelier Nord is a regular Marketing vendor, hence the vendor default.
+  "Atelier Nord": 36_000,
+  "Other vendors (11)": 89_000,
 }
 
 export interface BudgetNote {

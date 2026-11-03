@@ -1,16 +1,16 @@
 "use client"
 
 import { useState, type ReactNode } from "react"
-import { ArrowRight, Check, Clock, Info, Sparkles } from "lucide-react"
-import { DEPARTMENTS, LEDGER, PEOPLE, PURCHASE_ORDERS, VENDOR_DEFAULTS, lineLabel, type Transaction } from "@/lib/data"
+import { Clock, Info, Pencil } from "lucide-react"
+import { DEPARTMENTS, LEDGER, PEOPLE, VENDOR_DEFAULTS, lineLabel, type Transaction } from "@/lib/data"
 import { findLine } from "@/lib/finance/aggregate"
 import { formatEurExact } from "@/lib/finance/format"
 import { requestForTransaction, useCorrections } from "@/lib/corrections/store"
 import { RequestStatusBadge } from "@/components/corrections/request-status-badge"
-import { ReclassDialog } from "@/components/corrections/reclass-dialog"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { CodingEditor } from "./coding-editor"
 import { CODING_SOURCE_LABEL } from "./coding-source"
 import { CommentsThread } from "./comments-thread"
 import { InvoicePreview } from "./invoice-preview"
@@ -46,16 +46,13 @@ export function TransactionSheet({ transaction, onClose }: { transaction: Transa
 }
 
 function TransactionPanel({ transaction: t }: { transaction: Transaction }) {
-  const [reclassOpen, setReclassOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
   const requests = useCorrections((s) => s.requests)
   const request = requestForTransaction(requests, t.id)
   const pending = request?.status === "pending_approval"
 
   const { deptId, accountCode } = findLine(LEDGER, t.lineId)!
   const vendorDefault = VENDOR_DEFAULTS.find((v) => v.vendor === t.vendor)
-  const po = PURCHASE_ORDERS.find(
-    (p) => p.vendor === t.vendor && p.amount === t.amount && (p.deptId !== deptId || p.accountCode !== accountCode),
-  )
   const currentCoding = `${deptId ? DEPARTMENTS[deptId].name : "Revenue"} · ${lineLabel(accountCode)}`
 
   return (
@@ -89,7 +86,27 @@ function TransactionPanel({ transaction: t }: { transaction: Transaction }) {
         )}
 
         <Section title="Coding">
-          <Field label="Cost centre · GL account">{currentCoding}</Field>
+          {editing && deptId ? (
+            <CodingEditor
+              transaction={t}
+              from={{ deptId, accountCode }}
+              existing={request}
+              ledger={LEDGER}
+              onDone={() => setEditing(false)}
+            />
+          ) : (
+            <div className="flex items-center justify-between gap-4 py-1 text-[13.5px]">
+              <span className="text-muted-foreground">Cost centre · GL account</span>
+              <span className="flex items-center gap-2 font-medium text-foreground">
+                {currentCoding}
+                {deptId && !pending && (
+                  <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+                    <Pencil /> {request ? "Continue draft" : "Edit"}
+                  </Button>
+                )}
+              </span>
+            </div>
+          )}
           <Field label="Coding source">{CODING_SOURCE_LABEL[t.codingSource]}</Field>
           {t.poRef && <Field label="Purchase order">{t.poRef}</Field>}
           {t.invoiceRef && <Field label="Invoice">{t.invoiceRef}</Field>}
@@ -104,49 +121,6 @@ function TransactionPanel({ transaction: t }: { transaction: Transaction }) {
             </p>
           )}
         </Section>
-
-        {po && (
-          <Section title="Suggested match">
-            <div className="rounded-xl border border-brand/30 bg-linear-to-b from-brand-soft/50 to-card px-4 py-3.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-[14px] font-semibold">
-                  <Sparkles className="size-4 text-brand" aria-hidden /> {po.ref}
-                </span>
-                <span className="text-[13px] font-medium">{formatEurExact(po.amount)}</span>
-              </div>
-              <p className="mt-1 text-[13.5px] text-muted-foreground">{po.description}</p>
-              <p className="mt-0.5 text-[13px] text-muted-foreground">
-                Raised by {PEOPLE[po.requesterId].name}, {PEOPLE[po.requesterId].role} · {dateFmt.format(new Date(po.raisedOn))}
-              </p>
-              <div className="mt-3 flex items-center gap-2 text-[13.5px]">
-                <span className="text-muted-foreground line-through decoration-muted-foreground/50">{deptId ? DEPARTMENTS[deptId].name : "Revenue"}</span>
-                <ArrowRight className="size-3.5" aria-label="should be" />
-                <span className="font-semibold">
-                  {DEPARTMENTS[po.deptId].name} · {lineLabel(po.accountCode)}
-                </span>
-              </div>
-              <ul className="mt-3 space-y-1 text-[13px] text-muted-foreground">
-                {["Same vendor", "Exact amount", ...po.matchNotes].map((r) => (
-                  <li key={r} className="flex items-center gap-2">
-                    <Check className="size-3.5" aria-hidden /> {r}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-4 flex items-center gap-3">
-                <Button onClick={() => setReclassOpen(true)} disabled={pending} className="h-9 px-4">
-                  {pending ? "Reclassification requested" : request ? "Continue draft" : "Request reclassification"}
-                </Button>
-                <span className="text-[12.5px] text-muted-foreground">Goes to an approver. Actuals don’t change until then.</span>
-              </div>
-            </div>
-          </Section>
-        )}
-
-        {!po && !pending && (
-          <Button variant="outline" onClick={() => setReclassOpen(true)}>
-            Request reclassification
-          </Button>
-        )}
 
         {t.attachment && (
           <Section title="Attachment">
@@ -175,14 +149,6 @@ function TransactionPanel({ transaction: t }: { transaction: Transaction }) {
         </Section>
       </div>
 
-      <ReclassDialog
-        open={reclassOpen}
-        onOpenChange={setReclassOpen}
-        transaction={t}
-        suggestion={po ? { deptId: po.deptId, accountCode: po.accountCode, poRef: po.ref } : undefined}
-        existing={request}
-        ledger={LEDGER}
-      />
     </>
   )
 }

@@ -4,7 +4,8 @@
  */
 import type { DepartmentId, Ledger, Line, Transaction } from "@/lib/data/types"
 import { DEPARTMENT_ORDER, DEPARTMENTS, ACCOUNTS, lineLabel } from "@/lib/data/chart-of-accounts"
-import { needsAttention, resultImpact, variance, variancePct, type LineType } from "./variance"
+import { CURRENT_MONTH } from "@/lib/data/calendar"
+import { needsAttention, variance, variancePct, type LineType } from "./variance"
 
 export interface Amounts {
   actual: number
@@ -229,57 +230,65 @@ export interface WaterfallStep {
   attentionCount: number
 }
 
-/**
- * Bridge from budgeted to actual operating result for one month.
- * Departments with lines needing attention get their own step; the rest are grouped as "Others".
- */
-export function operatingResultBridge(ledger: Ledger, month: number): WaterfallStep[] {
-  const tree = buildVarianceTree(ledger, month)
-  const [revenue, expenses] = tree
-  const k = kpis(ledger, month)
-  const depts = expenses.subRows ?? []
-  const flagged = depts.filter((d) => d.attentionCount > 0)
-  const others = depts.filter((d) => d.attentionCount === 0)
+/** Accounts shown individually in a cost-centre bridge; the rest fold into "Other". */
+const BRIDGE_TOP_ACCOUNTS = 5
 
-  const deptStep = (rows: VarianceRow[], key: string, label: string, sublabel?: string): WaterfallStep => {
-    const f = sumFigures(rows.map((r) => r.figures)).month
+/**
+ * Bridge from budgeted to actual opex for one month. Company-wide: one step per cost centre.
+ * For a single cost centre: one step per account, largest variances first, the tail folded into "Other".
+ * Step values are spend variances (AC − BU), so overspend is positive.
+ */
+export function opexBridge(ledger: Ledger, month: number, deptId?: DepartmentId | null): WaterfallStep[] {
+  const [, expenses] = buildVarianceTree(ledger, month)
+  const scope = deptId ? expenses.subRows?.find((r) => r.deptId === deptId) : expenses
+  if (!scope) return []
+  const totals = scope.figures.month
+
+  const step = (row: VarianceRow, key: string, label: string, sublabel: string): WaterfallStep => {
+    const f = row.figures.month
     return {
       key,
       label,
       sublabel,
       kind: "delta",
-      value: resultImpact("expense", variance(f.actual, f.budget)),
+      value: variance(f.actual, f.budget),
       pct: variancePct(f.actual, f.budget),
       lineType: "expense",
-      deptIds: rows.map((r) => r.deptId as DepartmentId),
-      attentionCount: rows.reduce((s, r) => s + r.attentionCount, 0),
+      deptIds: row.deptId ? [row.deptId] : undefined,
+      attentionCount: row.attentionCount,
     }
   }
 
-  const steps: WaterfallStep[] = [
-    { key: "budget", label: "Budget", sublabel: "BU", kind: "total-budget", value: k.result.month.budget, pct: null, attentionCount: 0 },
+  let deltas: WaterfallStep[]
+  if (deptId) {
+    const byImpact = [...(scope.subRows ?? [])].sort((a, b) => {
+      const v = (r: VarianceRow) => Math.abs(variance(r.figures.month.actual, r.figures.month.budget))
+      return v(b) - v(a)
+    })
+    const top = byImpact.slice(0, BRIDGE_TOP_ACCOUNTS)
+    const rest = byImpact.slice(BRIDGE_TOP_ACCOUNTS)
+    deltas = top.map((r) => step(r, r.id, accountName(r.accountCode as string), r.accountCode as string))
+    if (rest.length) {
+      const other = parentRow(`${deptId}:other`, "line", "Other", "expense", rest, deptId)
+      deltas.push(step(other, other.id, "Other", `${rest.length} account${rest.length > 1 ? "s" : ""}`))
+    }
+  } else {
+    deltas = (scope.subRows ?? []).map((r) => step(r, r.deptId as string, r.label, "spend"))
+  }
+
+  return [
+    { key: "budget", label: "Budget", sublabel: "BU", kind: "total-budget", value: totals.budget, pct: null, attentionCount: 0 },
+    ...deltas,
     {
-      key: "revenue",
-      label: "Revenue",
-      kind: "delta",
-      value: variance(revenue.figures.month.actual, revenue.figures.month.budget),
-      pct: variancePct(revenue.figures.month.actual, revenue.figures.month.budget),
-      lineType: "revenue",
-      attentionCount: revenue.attentionCount,
+      key: "actual",
+      label: "Actual",
+      sublabel: month === CURRENT_MONTH ? "AC · provisional" : "AC",
+      kind: "total-actual",
+      value: totals.actual,
+      pct: variancePct(totals.actual, totals.budget),
+      attentionCount: 0,
     },
-    ...flagged.map((d) => deptStep([d], d.deptId as string, d.label)),
   ]
-  if (others.length) steps.push(deptStep(others, "others", "Others", `${others.length} depts`))
-  steps.push({
-    key: "actual",
-    label: "Actual",
-    sublabel: "AC · prov.",
-    kind: "total-actual",
-    value: k.result.month.actual,
-    pct: variancePct(k.result.month.actual, k.result.month.budget),
-    attentionCount: 0,
-  })
-  return steps
 }
 
 // ---------------------------------------------------------------- investigation helpers

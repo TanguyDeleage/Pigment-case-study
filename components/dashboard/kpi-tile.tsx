@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp } from "lucide-react"
-import type { PeriodFigures } from "@/lib/finance/aggregate"
-import { formatEur, formatPct } from "@/lib/finance/format"
+import type { Amounts } from "@/lib/finance/aggregate"
+import { formatEur, formatPct, rowDecimals } from "@/lib/finance/format"
 import { isFavourable, variance, variancePct, type LineType } from "@/lib/finance/variance"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -9,15 +9,17 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 interface KpiTileProps {
   title: string
   periodLabel: string
-  figures: PeriodFigures
+  amounts: Amounts
   /** Operating result behaves like revenue: higher is better. */
   lineType: LineType
+  /** €M for P&L totals, €k for a single line. */
+  unit?: "M" | "k"
 }
 
 const mDecimals = (v: number) => (Math.abs(v) >= 10_000_000 ? 1 : 2)
 
-export function KpiTile({ title, periodLabel, figures, lineType }: KpiTileProps) {
-  const { month } = figures
+export function KpiTile({ title, periodLabel, amounts: month, lineType, unit = "M" }: KpiTileProps) {
+  const kDecimals = rowDecimals(month.actual, month.budget)
   const mv = variance(month.actual, month.budget)
   const mFav = isFavourable(lineType, mv)
   const pct = variancePct(month.actual, month.budget)
@@ -35,7 +37,7 @@ export function KpiTile({ title, periodLabel, figures, lineType }: KpiTileProps)
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <CardTitle className="text-4xl font-bold tracking-tight tabular-nums">
-          {formatEur(month.actual, { unit: "M", decimals: 2 })}
+          {formatEur(month.actual, { unit, decimals: unit === "M" ? 2 : kDecimals })}
         </CardTitle>
         <div className="flex items-center gap-2 text-sm whitespace-nowrap text-muted-foreground">
           <Badge className={cn("gap-1 font-semibold tabular-nums", mFav ? "bg-fav-soft text-fav" : "bg-unfav-soft text-unfav")}>
@@ -43,8 +45,8 @@ export function KpiTile({ title, periodLabel, figures, lineType }: KpiTileProps)
             {formatPct(pct === null ? null : Math.abs(pct), { signed: false })}
           </Badge>
           <span>
-            <span className="font-semibold text-foreground tabular-nums">{formatEur(mv, { unit: "k", signed: true })}</span>{" "}
-            vs budget of <span className="tabular-nums">{formatEur(month.budget, { unit: "M", decimals: mDecimals(month.budget) })}</span>
+            <span className="font-semibold text-foreground tabular-nums">{formatEur(mv, { unit: "k", decimals: unit === "M" ? 0 : kDecimals, signed: true })}</span>{" "}
+            vs budget of <span className="tabular-nums">{formatEur(month.budget, { unit, decimals: unit === "M" ? mDecimals(month.budget) : kDecimals })}</span>
           </span>
         </div>
       </CardContent>

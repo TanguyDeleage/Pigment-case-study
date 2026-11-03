@@ -1,11 +1,10 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { CalendarDays, Globe, Info, Network, type LucideIcon } from "lucide-react"
+import { CalendarDays, Globe, Network, type LucideIcon } from "lucide-react"
 import { DEPARTMENT_ORDER, DEPARTMENTS, MONTH_NAMES, YEAR, type DepartmentId } from "@/lib/data"
 import { CURRENT_MONTH } from "@/lib/data/calendar"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 const ALL = "all"
 
@@ -88,18 +87,6 @@ export function FilterBar({ month, onMonthChange, costCentre, onCostCentreChange
           </SelectGroup>
         </SelectContent>
       </Select>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span tabIndex={0} className="ml-auto flex items-center gap-1.5 rounded-md text-xs text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
-            <Info className="size-3.5" aria-hidden />
-            AC = Actual · BU = Budget · Var = AC − BU
-          </span>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="max-w-64">
-          Notation follows IBCS: solid bars are actuals, outlined bars are budget, dashed means provisional.
-        </TooltipContent>
-      </Tooltip>
     </div>
   )
 }

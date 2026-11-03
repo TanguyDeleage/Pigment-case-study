@@ -2,17 +2,16 @@
 
 import { useMemo } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { DEPARTMENTS, LEDGER, PEOPLE, VENDOR_HISTORY } from "@/lib/data"
-import { CURRENT_MONTH } from "@/lib/data/calendar"
+import { LEDGER, VENDOR_HISTORY } from "@/lib/data"
+import { CURRENT_MONTH, MONTHS, YEAR } from "@/lib/data/calendar"
 import { findLine, lineFigures, monthlySeries, transactionsForLine } from "@/lib/finance/aggregate"
 import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChartLegend, MonthlyBars } from "@/components/charts/monthly-bars"
+import { KpiTile } from "@/components/dashboard/kpi-tile"
 import { TransactionSheet } from "@/components/transaction/transaction-sheet"
 import { BudgetCheck } from "./budget-check"
-import { RelatedVarianceHint } from "./related-variance-hint"
-import { SummaryStrip } from "./summary-strip"
 import { TransactionsTable } from "./transactions-table"
 import { VendorBreakdown } from "./vendor-breakdown"
 
@@ -33,7 +32,6 @@ export function VarianceDetail({ lineId }: { lineId: string }) {
   const series = useMemo(() => monthlySeries(LEDGER, [line]), [line])
   const transactions = useMemo(() => transactionsForLine(LEDGER, lineId), [lineId])
   const selectedTx = transactions.find((t) => t.id === txId) ?? null
-  const owner = line.deptId ? PEOPLE[DEPARTMENTS[line.deptId].ownerId] : null
 
   const setParams = (next: Record<string, string | null>) => {
     const sp = new URLSearchParams(params.toString())
@@ -48,8 +46,6 @@ export function VarianceDetail({ lineId }: { lineId: string }) {
 
   return (
     <>
-      <SummaryStrip line={line} figures={figures} month={month} owner={owner} />
-
       <Tabs value={tab} onValueChange={(v) => setParams({ tab: v === "overview" ? null : v })} className="gap-4">
         <TabsList>
           <TabsTrigger value="overview" className="px-3">Overview</TabsTrigger>
@@ -61,7 +57,12 @@ export function VarianceDetail({ lineId }: { lineId: string }) {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] gap-4">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)] gap-4">
+            <div className="space-y-4">
+              <KpiTile title="Month · AC provisional" periodLabel={`${MONTHS[month]} ${YEAR}`} amounts={figures.month} lineType={line.lineType} unit="k" />
+              <KpiTile title="Year to date" periodLabel={`Jan–${MONTHS[month]} ${YEAR}`} amounts={figures.ytd} lineType={line.lineType} unit="k" />
+              <BudgetCheck lineId={lineId} series={series} month={month} />
+            </div>
             <Card className="shadow-xs" aria-labelledby="phasing-title">
               <CardHeader>
                 <CardTitle id="phasing-title">Monthly actuals vs phased budget</CardTitle>
@@ -73,16 +74,12 @@ export function VarianceDetail({ lineId }: { lineId: string }) {
               <CardContent>
               <MonthlyBars
                 unit="k"
-                panelHeight={330}
+                panelHeight={240}
                 ariaLabel="Monthly actuals versus phased budget for this line"
                 panels={[{ label: "", lineType: line.lineType, series }]}
               />
               </CardContent>
             </Card>
-            <div className="space-y-4">
-              <BudgetCheck lineId={lineId} series={series} month={month} />
-              <RelatedVarianceHint lineId={lineId} month={month} />
-            </div>
           </div>
 
           <Card className="gap-0 pb-0 shadow-xs" aria-labelledby="largest-title">

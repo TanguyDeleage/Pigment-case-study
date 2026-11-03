@@ -4,7 +4,7 @@ import {
   kpis,
   monthlySeries,
   linesOf,
-  operatingResultBridge,
+  opexBridge,
   type VarianceRow,
 } from "@/lib/finance/aggregate"
 import { CURRENT_MONTH } from "./calendar"
@@ -51,16 +51,32 @@ describe("ledger reproduces the mockup figures (€k)", () => {
     expect(leaves.filter((r) => !r.attention)).toHaveLength(57)
   })
 
-  it("waterfall bridges 3,200 to 3,269", () => {
-    const steps = operatingResultBridge(LEDGER, CURRENT_MONTH)
+  it("opex bridge runs from 21,800 to 21,851", () => {
+    const steps = opexBridge(LEDGER, CURRENT_MONTH)
     expect(steps.map((s) => [s.key, k(s.value)])).toEqual([
-      ["budget", 3_200],
-      ["revenue", 120],
-      ["marketing", -70],
-      ["sales-emea", 50],
-      ["rnd", -35],
-      ["others", 4],
-      ["actual", 3_269],
+      ["budget", 21_800],
+      ["marketing", 70],
+      ["sales-emea", -50],
+      ["rnd", 35],
+      ["sales-americas", -1],
+      ["customer-success", -1],
+      ["g-and-a", -1],
+      ["people", -1],
+      ["actual", 21_851],
+    ])
+  })
+
+  it("marketing bridge breaks down by account, largest variance first", () => {
+    const steps = opexBridge(LEDGER, CURRENT_MONTH, "marketing")
+    expect(steps.map((s) => [s.key, k(s.value)])).toEqual([
+      ["budget", 1_100],
+      ["marketing:6233", 52],
+      ["marketing:6411", 6],
+      ["marketing:6451", 5],
+      ["marketing:6135", 2],
+      ["marketing:6231", 2],
+      ["marketing:other", 2],
+      ["actual", 1_170],
     ])
   })
 

@@ -74,7 +74,7 @@ describe("investigation helpers", () => {
   it("flags Atelier Nord as the only vendor outlier", () => {
     const rows = vendorBreakdown(LEDGER, "marketing:6233", MARKETING_6233_VENDOR_HISTORY)
     expect(rows.filter((r) => r.outlier).map((r) => r.vendor)).toEqual(["Atelier Nord"])
-    expect(rows[0]).toMatchObject({ vendor: "Atelier Nord", month: 48_000, outlierReason: "New vendor on this line" })
+    expect(rows[0]).toMatchObject({ vendor: "Atelier Nord", month: 48_000, outlierReason: "12.0× usual month" })
     expect(rows.reduce((s, r) => s + r.priorTotal, 0)).toBe(1_230_000)
   })
 })
