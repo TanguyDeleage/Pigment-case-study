@@ -14,7 +14,7 @@ import {
 } from "@tanstack/react-table"
 import { ArrowRight, ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Flag, Search, X } from "lucide-react"
 import type { DepartmentId } from "@/lib/data"
-import { MONTH_NAMES, ytdLabel } from "@/lib/data/calendar"
+import { CURRENT_MONTH, MONTH_NAMES, ytdLabel } from "@/lib/data/calendar"
 import type { VarianceRow } from "@/lib/finance/aggregate"
 import { formatK, formatPct, rowDecimals } from "@/lib/finance/format"
 import { ATTENTION_THRESHOLD, isFavourable, variance, variancePct } from "@/lib/finance/variance"
@@ -146,7 +146,7 @@ export function VarianceTable({ rows, month, focus, onClearFocus }: VarianceTabl
           },
         ],
       },
-      block("month", `${MONTH_NAMES[month]} · AC provisional`),
+      block("month", `${MONTH_NAMES[month]} · AC ${month === CURRENT_MONTH ? "provisional" : "closed"}`),
       block("ytd", ytdLabel(month)),
       {
         id: "status-group",

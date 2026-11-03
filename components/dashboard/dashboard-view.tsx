@@ -12,9 +12,8 @@ import { FilterBar } from "./filter-bar"
 import { KpiTile } from "./kpi-tile"
 import { VarianceTable, type TableFocus } from "./variance-table"
 
-const month = CURRENT_MONTH
-
 export function DashboardView() {
+  const [month, setMonth] = useState(CURRENT_MONTH)
   const [focus, setFocus] = useState<TableFocus | null>(null)
 
   const data = useMemo(
@@ -25,7 +24,7 @@ export function DashboardView() {
       bridge: operatingResultBridge(LEDGER, month),
       tree: buildVarianceTree(LEDGER, month),
     }),
-    [],
+    [month],
   )
 
   const periodLabel = `${MONTHS[month]} ${YEAR}`
@@ -44,7 +43,7 @@ export function DashboardView() {
 
   return (
     <>
-      <FilterBar costCentre={costCentre} onCostCentreChange={selectCostCentre} />
+      <FilterBar month={month} onMonthChange={setMonth} costCentre={costCentre} onCostCentreChange={selectCostCentre} />
 
       <div className="grid grid-cols-3 gap-4">
         <KpiTile title="Revenue" icon={Landmark} periodLabel={periodLabel} ytdLabel={ytd} figures={data.kpis.revenue} lineType="revenue" />
@@ -69,10 +68,11 @@ export function DashboardView() {
                 { label: "Revenue", lineType: "revenue", series: data.revenueSeries },
                 { label: "Opex", lineType: "expense", series: data.opexSeries },
               ]}
+              selectedMonth={month}
             />
           </CardContent>
           <CardFooter className="py-3 text-xs text-muted-foreground">
-            Selected month: {MONTH_NAMES[month]} (provisional). Nov–Dec: budget only, no actuals yet.
+            Selected month: {MONTH_NAMES[month]} ({month === CURRENT_MONTH ? "provisional" : "closed"}). Nov–Dec: budget only, no actuals yet.
           </CardFooter>
         </Card>
 

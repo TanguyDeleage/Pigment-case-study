@@ -18,6 +18,8 @@ interface MonthlyBarsProps {
   unit: "M" | "k"
   panelHeight?: number
   ariaLabel: string
+  /** Month to highlight; defaults to the provisional month. */
+  selectedMonth?: number
 }
 
 const W = 620
@@ -33,7 +35,7 @@ const TOP = 14
  * IBCS-style column chart: AC solid, BU outlined behind it, provisional AC lighter with
  * a dotted outline. Small multiples share one scale ("same unit, same scale").
  */
-export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: MonthlyBarsProps) {
+export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel, selectedMonth }: MonthlyBarsProps) {
   const [hover, setHover] = useState<number | null>(null)
   const max = Math.max(...panels.flatMap((p) => p.series.flatMap((s) => [s.actual ?? 0, s.budget])))
   const scale = (v: number) => (v / max) * panelHeight
@@ -42,6 +44,7 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
   const panelBlock = LABEL_H + panelHeight + DELTA_H
   const H = TOP + panels.length * panelBlock + (panels.length - 1) * PANEL_GAP + AXIS_H
   const provisional = panels[0].series.findIndex((p) => p.provisional)
+  const selected = selectedMonth ?? provisional
 
   const div = unit === "M" ? 1_000_000 : 1_000
   const fmt = (v: number) => (unit === "M" ? (v / div).toFixed(1) : Math.round(v / div).toLocaleString("en-GB"))
@@ -54,15 +57,15 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
   return (
     <div className="relative">
       <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label={ariaLabel}>
-        {provisional >= 0 && (
+        {selected >= 0 && (
           <g>
-            <rect x={ML + provisional * cw + 2} y={0} width={cw - 4} height={H - AXIS_H + 6} className="fill-band" rx={6} />
-            <text x={ML + (provisional + 0.5) * cw} y={10} textAnchor="middle" className="fill-muted-foreground text-[9.5px] font-semibold tracking-wider">
-              PROV.
+            <rect x={ML + selected * cw + 2} y={0} width={cw - 4} height={H - AXIS_H + 6} className="fill-band" rx={6} />
+            <text x={ML + (selected + 0.5) * cw} y={10} textAnchor="middle" className="fill-muted-foreground text-[9.5px] font-semibold tracking-wider">
+              {selected === provisional ? "PROV." : "SEL."}
             </text>
           </g>
         )}
-        {hover !== null && hover !== provisional && (
+        {hover !== null && hover !== selected && (
           <rect x={ML + hover * cw + 2} y={0} width={cw - 4} height={H - AXIS_H + 6} className="fill-muted/70" rx={6} />
         )}
 
@@ -142,7 +145,7 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel }: Mont
             x={ML + (i + 0.5) * cw}
             y={H - 8}
             textAnchor="middle"
-            className={`text-[12px] ${i === provisional ? "fill-foreground font-semibold" : "fill-muted-foreground"}`}
+            className={`text-[12px] ${i === selected ? "fill-foreground font-semibold" : "fill-muted-foreground"}`}
           >
             {m}
           </text>
