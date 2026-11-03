@@ -1,9 +1,9 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Landmark, MousePointerClick, Receipt, Wallet } from "lucide-react"
+import { MousePointerClick } from "lucide-react"
 import { DEPARTMENTS, LEDGER, MONTHS, MONTH_NAMES, type DepartmentId } from "@/lib/data"
-import { CURRENT_MONTH, YEAR, ytdLabel } from "@/lib/data/calendar"
+import { CURRENT_MONTH, YEAR } from "@/lib/data/calendar"
 import { buildVarianceTree, kpis, linesOf, monthlySeries, operatingResultBridge, type WaterfallStep } from "@/lib/finance/aggregate"
 import { ChartLegend, MonthlyBars } from "@/components/charts/monthly-bars"
 import { Waterfall, WaterfallLegend } from "@/components/charts/waterfall"
@@ -28,7 +28,6 @@ export function DashboardView() {
   )
 
   const periodLabel = `${MONTHS[month]} ${YEAR}`
-  const ytd = ytdLabel(month)
 
   const selectStep = (step: WaterfallStep) => {
     if (focus?.key === step.key) return setFocus(null)
@@ -46,9 +45,9 @@ export function DashboardView() {
       <FilterBar month={month} onMonthChange={setMonth} costCentre={costCentre} onCostCentreChange={selectCostCentre} />
 
       <div className="grid grid-cols-3 gap-4">
-        <KpiTile title="Revenue" icon={Landmark} periodLabel={periodLabel} ytdLabel={ytd} figures={data.kpis.revenue} lineType="revenue" />
-        <KpiTile title="Opex" icon={Receipt} periodLabel={periodLabel} ytdLabel={ytd} figures={data.kpis.opex} lineType="expense" />
-        <KpiTile title="Operating result" icon={Wallet} periodLabel={periodLabel} ytdLabel={ytd} figures={data.kpis.result} lineType="revenue" />
+        <KpiTile title="Revenue" periodLabel={periodLabel} figures={data.kpis.revenue} lineType="revenue" />
+        <KpiTile title="Opex" periodLabel={periodLabel} figures={data.kpis.opex} lineType="expense" />
+        <KpiTile title="Operating result" periodLabel={periodLabel} figures={data.kpis.result} lineType="revenue" />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
