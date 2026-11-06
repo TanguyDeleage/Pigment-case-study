@@ -17,17 +17,20 @@ export const STORY_TRANSACTIONS: Transaction[] = [
     amount: 48_000,
     codingSource: "vendor_default",
     invoiceRef: "INV-AN-2026-1042",
+    location: "Lisbon, Portugal",
+    dueDate: "2026-11-17",
+    paid: false,
     attachment: {
       fileName: "INV-AN-2026-1042.pdf",
       sizeKb: 182,
       invoiceNumber: "INV-AN-2026-1042",
       issuedOn: "2026-10-18",
       lines: [
-        { description: "Stand design, 36 m² island, EMEA Sales Summit Lisbon", amount: 14_500 },
+        { description: "Sales Summit Lisbon: stand design, 36 m² island", amount: 14_500 },
         { description: "Build, transport and on-site assembly (15–16 Oct)", amount: 27_300 },
         { description: "AV rental and dismantling", amount: 6_200 },
       ],
-      note: "Your ref: M. Lefèvre, Sales EMEA",
+      note: "Sales Summit Lisbon, your ref: M. Lefèvre, Sales EMEA",
     },
     comments: [
       {
@@ -167,7 +170,7 @@ export const VENDOR_DEFAULTS: VendorDefault[] = [
     deptId: "marketing",
     accountCode: "6233",
     since: "2025-03-12",
-    origin: "first invoice, Marketing's Paris SaaS Expo stand",
+    origin: "Paris SaaS Expo",
   },
 ]
 

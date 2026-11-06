@@ -8,6 +8,8 @@ interface CorrectionsState {
   requests: CorrectionRequest[]
   /** Creates or replaces a request (drafts are re-saved under the same id). */
   save: (request: CorrectionRequest) => void
+  /** Withdraws a request before it is approved. */
+  remove: (id: string) => void
 }
 
 /** In-memory only: a page reload resets the demo. */
@@ -15,6 +17,7 @@ export const useCorrections = create<CorrectionsState>((set) => ({
   requests: [],
   save: (request) =>
     set((s) => ({ requests: [...s.requests.filter((r) => r.id !== request.id), request] })),
+  remove: (id) => set((s) => ({ requests: s.requests.filter((r) => r.id !== id) })),
 }))
 
 let sequence = 42

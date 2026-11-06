@@ -61,7 +61,7 @@ describe("formatting", () => {
     expect(formatPct(52 / 30)).toBe("+173%")
     expect(formatPct(-0.9)).toBe("−90%")
     expect(formatPct(-48 / 410)).toBe("−11.7%")
-    expect(formatPct(-0.0004)).toBe("±0.0%")
+    expect(formatPct(-0.0004)).toBe("0.0%")
     expect(formatPct(null)).toBe("Unbudgeted")
   })
 })

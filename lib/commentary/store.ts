@@ -12,6 +12,9 @@ export interface Commentary {
 /** Commentary explains one line's variance for one month. */
 export const commentaryKey = (lineId: string, month: number) => `${lineId}@${month}`
 
+/** A cell comment annotates one figure (row × column) for one month's view. */
+export const cellCommentKey = (rowId: string, month: number, columnId: string) => `${rowId}@${month}#${columnId}`
+
 interface CommentaryState {
   byKey: Record<string, Commentary>
   save: (key: string, commentary: Commentary | null) => void

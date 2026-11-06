@@ -9,7 +9,6 @@ export default function DashboardPage() {
       <PageHeader
         crumbs={[{ label: "Finance", href: "/" }, { label: "Budget vs Actuals" }]}
         title="Budget vs Actuals"
-        description="Where October landed against the FY2026 budget, and which lines need a closer look."
       />
       <PageContent>
         {/* TanStack Table reads the clock while rendering, so the interactive view streams in. */}

@@ -17,7 +17,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full min-w-[1280px]">
+      {/* suppressHydrationWarning: browser extensions (e.g. ColorZilla) inject attributes on <body> before hydration */}
+      <body className="min-h-full min-w-[1280px]" suppressHydrationWarning>
         <TooltipProvider delayDuration={200}>
           <SidebarProvider>
             <AppSidebar />

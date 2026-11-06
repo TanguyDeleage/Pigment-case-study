@@ -69,6 +69,11 @@ export interface Transaction {
   poRef?: string
   attachment?: InvoiceAttachment
   comments?: Comment[]
+  /** Where the spend happened, when known (events, travel). */
+  location?: string
+  /** Payable due date; absent means paid or not tracked. */
+  dueDate?: string
+  paid?: boolean
 }
 
 export interface PurchaseOrder {

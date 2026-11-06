@@ -1,16 +1,30 @@
 "use client"
 
 import { useState } from "react"
-import { CURRENT_USER, PEOPLE, type Comment } from "@/lib/data"
+import { MessageSquare } from "lucide-react"
+import { CURRENT_USER, PEOPLE, type Comment, type PersonId } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 
 const timeFmt = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
 
-function Avatar({ initials }: { initials: string }) {
+function when(at: string): string {
+  return Date.now() - new Date(at).getTime() < 60_000 ? "just now" : timeFmt.format(new Date(at))
+}
+
+const AVATAR_TONES = [
+  "bg-sky-100 text-sky-800",
+  "bg-violet-100 text-violet-800",
+  "bg-emerald-100 text-emerald-800",
+  "bg-amber-100 text-amber-800",
+  "bg-rose-100 text-rose-800",
+]
+
+function Avatar({ personId }: { personId: PersonId }) {
+  const tone = AVATAR_TONES[[...personId].reduce((s, c) => s + c.charCodeAt(0), 0) % AVATAR_TONES.length]
   return (
-    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
-      {initials}
+    <span className={`flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${tone}`}>
+      {PEOPLE[personId].initials}
     </span>
   )
 }
@@ -19,7 +33,6 @@ function Avatar({ initials }: { initials: string }) {
 export function CommentsThread({ initial }: { initial: Comment[] }) {
   const [comments, setComments] = useState(initial)
   const [draft, setDraft] = useState("")
-  const me = PEOPLE[CURRENT_USER]
 
   const post = () => {
     if (!draft.trim()) return
@@ -29,38 +42,36 @@ export function CommentsThread({ initial }: { initial: Comment[] }) {
 
   return (
     <div>
-      <ul className="space-y-3">
-        {comments.map((c) => {
-          const author = PEOPLE[c.authorId]
-          return (
-            <li key={c.id} className="flex gap-2.5">
-              <Avatar initials={author.initials} />
-              <div className="min-w-0">
-                <div className="text-[12.5px]">
-                  <span className="font-semibold">{author.name}</span>{" "}
-                  <span className="text-muted-foreground">
-                    {author.role} · {timeFmt.format(new Date(c.at))}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-[13.5px] text-foreground">{c.body}</p>
+      <ul className="space-y-4">
+        {comments.map((c) => (
+          <li key={c.id} className="flex gap-2.5">
+            <Avatar personId={c.authorId} />
+            <div className="min-w-0">
+              <div className="text-[12.5px]">
+                <span className="font-semibold">{PEOPLE[c.authorId].name}</span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  · {when(c.at)}
+                </span>
               </div>
-            </li>
-          )
-        })}
+              <p className="mt-0.5 text-[13.5px] text-foreground">{c.body}</p>
+            </div>
+          </li>
+        ))}
       </ul>
-      <div className="mt-3 flex gap-2.5">
-        <Avatar initials={me.initials} />
+      <div className="mt-4 flex gap-2.5">
+        <Avatar personId={CURRENT_USER} />
         <div className="flex-1">
           <Textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Reply or @mention someone"
             aria-label="Add a comment"
-            className="min-h-16 text-[13.5px]"
+            className="min-h-14 text-[13.5px]"
           />
           <div className="mt-2 flex justify-end">
-            <Button size="sm" variant="outline" onClick={post} disabled={!draft.trim()}>
-              Comment
+            <Button size="lg" variant="outline" onClick={post} disabled={!draft.trim()}>
+              <MessageSquare /> Comment
             </Button>
           </div>
         </div>

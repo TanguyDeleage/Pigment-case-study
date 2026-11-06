@@ -14,11 +14,12 @@ interface KpiTileProps {
   lineType: LineType
   /** €M for P&L totals, €k for a single line. */
   unit?: "M" | "k"
+  className?: string
 }
 
 const mDecimals = (v: number) => (Math.abs(v) >= 10_000_000 ? 1 : 2)
 
-export function KpiTile({ title, periodLabel, amounts: month, lineType, unit = "M" }: KpiTileProps) {
+export function KpiTile({ title, periodLabel, amounts: month, lineType, unit = "M", className }: KpiTileProps) {
   const kDecimals = rowDecimals(month.actual, month.budget)
   const mv = variance(month.actual, month.budget)
   const mFav = isFavourable(lineType, mv)
@@ -26,7 +27,7 @@ export function KpiTile({ title, periodLabel, amounts: month, lineType, unit = "
   const Arrow = mv < 0 ? ArrowDown : ArrowUp
 
   return (
-    <Card className="gap-4 shadow-xs" aria-label={`${title} KPI`}>
+    <Card className={cn("gap-4 shadow-xs", className)} aria-label={`${title} KPI`}>
       <CardHeader>
         <CardDescription className="font-medium">{title}</CardDescription>
         <CardAction>

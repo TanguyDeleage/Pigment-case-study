@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Send } from "lucide-react"
 import { toast } from "sonner"
 import { CURRENT_USER, DEPARTMENT_ORDER, DEPARTMENTS, PEOPLE, lineLabel, type DepartmentId, type Ledger, type Transaction } from "@/lib/data"
 import { formatEur } from "@/lib/finance/format"
@@ -20,7 +21,7 @@ interface CodingEditorProps {
   onDone: () => void
 }
 
-/** Inline recoding: the user picks the new cost centre and GL account, then submits it for review. */
+/** Inline recoding: the user suggests a new cost centre and GL account, which goes to an approver. */
 export function CodingEditor({ transaction: t, from, existing, ledger, onDone }: CodingEditorProps) {
   const save = useCorrections((s) => s.save)
   const [toDept, setToDept] = useState<DepartmentId>(existing?.to.deptId ?? from.deptId)
@@ -60,16 +61,18 @@ export function CodingEditor({ transaction: t, from, existing, ledger, onDone }:
     }
     save(request)
     onDone()
-    toast.success(`Sent to ${reviewer.name} for review`, {
-      description: `${request.id} · ${formatEur(t.amount, { unit: "k" })} from ${DEPARTMENTS[from.deptId].name} to ${DEPARTMENTS[toDept].name}. Actuals update once approved and posted.`,
+    toast.success(`Suggestion sent to ${reviewer.name}`, {
+      description: `${formatEur(t.amount, { unit: "k" })} from ${DEPARTMENTS[from.deptId].name} to ${DEPARTMENTS[toDept].name}. Actuals update once approved.`,
     })
   }
 
   return (
-    <div className="space-y-3 rounded-lg border bg-muted/40 px-4 py-3.5">
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <Label className="text-[12.5px] text-muted-foreground">Cost centre</Label>
+    <div className="space-y-4">
+      <div className="grid grid-cols-[104px_1fr] items-start gap-x-4 gap-y-3 text-[13.5px]">
+        <Label htmlFor="coding-dept" className="h-9 font-medium">
+          Cost centre
+        </Label>
+        <div>
           <Select
             value={toDept}
             onValueChange={(v) => {
@@ -79,7 +82,11 @@ export function CodingEditor({ transaction: t, from, existing, ledger, onDone }:
               if (!codes.includes(toAccount)) setToAccount(codes[0])
             }}
           >
-            <SelectTrigger aria-label="Cost centre" className="w-full bg-card">
+            <SelectTrigger
+              id="coding-dept"
+              className="h-9 w-full data-[size=default]:h-9 aria-[invalid=true]:border-unfav"
+              aria-invalid={touched && !!errors.to}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -90,11 +97,15 @@ export function CodingEditor({ transaction: t, from, existing, ledger, onDone }:
               ))}
             </SelectContent>
           </Select>
+          {toDept !== from.deptId && <p className="mt-1.5 text-[12px] text-muted-foreground">Was {DEPARTMENTS[from.deptId].name}</p>}
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-[12.5px] text-muted-foreground">GL account</Label>
+
+        <Label htmlFor="coding-account" className="h-9 font-medium">
+          GL account
+        </Label>
+        <div>
           <Select value={toAccount} onValueChange={setToAccount}>
-            <SelectTrigger aria-label="GL account" className="w-full bg-card">
+            <SelectTrigger id="coding-account" className="h-9 w-full data-[size=default]:h-9">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -105,34 +116,34 @@ export function CodingEditor({ transaction: t, from, existing, ledger, onDone }:
               ))}
             </SelectContent>
           </Select>
+          {toAccount !== from.accountCode && <p className="mt-1.5 text-[12px] text-muted-foreground">Was {lineLabel(from.accountCode)}</p>}
         </div>
       </div>
       {touched && errors.to && <p className="text-[12.5px] text-unfav">{errors.to}</p>}
 
       <div>
-        <Label htmlFor="coding-comment" className="mb-1.5 text-[12.5px] text-muted-foreground">
-          Note for the reviewer <span className="text-muted-foreground">(required)</span>
+        <Label htmlFor="coding-comment" className="mb-2 text-[13.5px] font-semibold">
+          Why this change?
         </Label>
         <Textarea
           id="coding-comment"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Why is the current coding wrong, and how do you know?"
+          placeholder="What makes the current coding wrong, and how do you know?"
           aria-invalid={touched && !!errors.comment}
-          className="min-h-20 bg-card text-[13.5px]"
+          className="min-h-20 text-[13.5px]"
         />
-        {touched && errors.comment && <p className="mt-1 text-[12.5px] text-unfav">{errors.comment}</p>}
+        <p className={touched && errors.comment ? "mt-1.5 text-[12px] text-unfav" : "mt-1.5 text-[12px] text-muted-foreground"}>
+          {touched && errors.comment ? errors.comment : "Goes to the approver and stays in the audit trail."}
+        </p>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="mr-auto text-[12.5px] text-muted-foreground">
-          Reviewed by {reviewer.name}. Actuals don’t change until approved.
-        </span>
-        <Button variant="ghost" onClick={onDone}>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" size="lg" onClick={onDone}>
           Cancel
         </Button>
-        <Button onClick={submit} className="px-4">
-          Submit for review
+        <Button size="lg" onClick={submit} className="bg-brand px-3.5 text-white hover:bg-brand/90">
+          <Send /> Send suggestion
         </Button>
       </div>
     </div>

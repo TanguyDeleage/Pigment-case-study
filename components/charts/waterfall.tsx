@@ -1,4 +1,3 @@
-import { TriangleAlert } from "lucide-react"
 import type { WaterfallStep } from "@/lib/finance/aggregate"
 import { formatK } from "@/lib/finance/format"
 import { cn } from "@/lib/utils"
@@ -9,11 +8,11 @@ interface WaterfallProps {
 }
 
 const W = 720
-const ML = 44
+const ML = 60
 const MR = 4
 const TOP = 36
 const PLOT_H = 240
-const BOTTOM = 4
+const BOTTOM = 8
 const H = TOP + PLOT_H + BOTTOM
 
 const k = (v: number) => formatK(v)
@@ -54,7 +53,7 @@ export function Waterfall({ steps }: WaterfallProps) {
 
   return (
     <div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label="Opex bridge from budget to actual by cost centre">
+      <svg viewBox={`0 0 ${W} ${H}`} className="block w-full overflow-visible" role="img" aria-label="Opex bridge from budget to actual by cost centre">
         {ticks.map((t) => (
           <g key={t}>
             <line x1={ML} x2={W - MR} y1={y(t)} y2={y(t)} className={t === dLo ? "stroke-foreground/30" : "stroke-foreground/8"} />
@@ -127,16 +126,6 @@ export function Waterfall({ steps }: WaterfallProps) {
         {steps.map((s) => (
           <div key={s.key} className="flex flex-col items-center px-0.5 pt-3 text-center">
             <span className={cn("text-[13px] leading-tight text-foreground", s.kind === "delta" ? "font-medium" : "font-semibold")}>{s.label}</span>
-            {s.sublabel && <span className="mt-0.5 text-xs text-muted-foreground">{s.sublabel}</span>}
-            {s.kind === "delta" && s.attentionCount > 0 && (
-              <span
-                className="mt-1.5 flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium whitespace-nowrap text-foreground"
-                title={`${s.attentionCount} line${s.attentionCount > 1 ? "s" : ""} ${s.attentionCount > 1 ? "need" : "needs"} attention`}
-              >
-                <TriangleAlert className="size-2.5 shrink-0 text-unfav" aria-hidden />
-                To review
-              </span>
-            )}
           </div>
         ))}
       </div>

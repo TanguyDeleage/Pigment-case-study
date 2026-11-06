@@ -8,35 +8,43 @@ import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 /**
- * Shows that a correction touching this line is awaiting approval.
- * Actuals are unchanged: the dashed outline reads as "provisional", like the charts.
+ * A quiet clock icon showing that an edit touching this line is awaiting approval.
+ * Details live in the tooltip so the row stays readable; actuals are unchanged until approved.
  */
 export function PendingMarker({ lineId, className }: { lineId: string; className?: string }) {
   const requests = useCorrections((s) => s.requests)
   const pending = pendingForLine(requests, lineId)
   if (!pending.length) return null
-  const total = pending.reduce((s, r) => s + r.amount, 0)
   const first = pending[0]
   const outgoing = `${first.from.deptId}:${first.from.accountCode}` === lineId
+  const label = pending.length > 1 ? `${pending.length} edits requested` : "Edit requested"
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <span
           tabIndex={0}
+          role="img"
+          aria-label={`${label}, pending approval`}
+          onClick={(e) => e.stopPropagation()}
           className={cn(
-            "inline-flex h-5 items-center gap-1 rounded-full border border-dashed border-amber-500/60 bg-amber-50 px-2 text-xs font-medium whitespace-nowrap text-amber-800",
+            "inline-flex size-5 shrink-0 items-center justify-center rounded-md text-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50",
             className,
           )}
         >
-          <Clock className="size-3" aria-hidden />
-          {formatEur(total, { unit: "k" })} correction pending
+          <Clock className="size-3.5" aria-hidden />
         </span>
       </TooltipTrigger>
       <TooltipContent className="max-w-72">
-        {first.id}: {formatEur(first.amount, { unit: "k" })} {outgoing ? "moving to" : "moving from"}{" "}
-        {DEPARTMENTS[outgoing ? first.to.deptId : first.from.deptId].name}. Waiting for {PEOPLE[first.approverId].name}.
-        Actuals stay as booked until approved and posted.
+        <div className="font-medium">{label} · pending approval</div>
+        <div className="mt-0.5 opacity-80">
+          {pending.length > 1
+            ? `${formatEur(pending.reduce((s, r) => s + r.amount, 0), { unit: "k" })} in total. `
+            : `${first.vendor}, ${formatEur(first.amount, { unit: "k" })} ${outgoing ? "moving to" : "moving from"} ${
+                DEPARTMENTS[outgoing ? first.to.deptId : first.from.deptId].name
+              }. `}
+          Waiting for {PEOPLE[first.approverId].name}. Actuals stay as booked until approved.
+        </div>
       </TooltipContent>
     </Tooltip>
   )

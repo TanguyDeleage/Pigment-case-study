@@ -31,7 +31,7 @@ function sign(value: number, signed: boolean): string {
   if (!signed) return value < 0 ? MINUS : ""
   if (value > 0) return "+"
   if (value < 0) return MINUS
-  return "±"
+  return "" // zero carries no sign
 }
 
 /**
@@ -52,7 +52,7 @@ export function formatK(value: number, opts: { decimals?: number; signed?: boole
   return formatEur(value, { unit: "k", symbol: false, ...opts }).replace(/k$/, "")
 }
 
-/** "+173%", "+6.4%", "−90%". One decimal below 50%, none above (big swings need no precision). Null → "Unbudgeted". */
+/** "+173%", "+6.4%", "−90%", "0.0%". One decimal below 50%, none above (big swings need no precision). Null → "Unbudgeted". */
 export function formatPct(pct: number | null, opts: { signed?: boolean; decimals?: number } = {}): string {
   if (pct === null) return "Unbudgeted"
   const { signed = true } = opts

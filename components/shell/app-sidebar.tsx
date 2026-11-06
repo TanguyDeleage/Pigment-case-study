@@ -7,14 +7,12 @@ import {
   ChevronsUpDown,
   FileText,
   LogOut,
-  PencilLine,
   Settings,
   Target,
   UserRound,
   type LucideIcon,
 } from "lucide-react"
 import { CURRENT_USER, PEOPLE } from "@/lib/data"
-import { useCorrections } from "@/lib/corrections/store"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -34,7 +32,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
@@ -53,7 +50,7 @@ const ANALYSIS: Item[] = [
   { label: "Reports", icon: FileText },
 ]
 
-function NavItem({ item, pathname, badge }: { item: Item; pathname: string; badge?: number }) {
+function NavItem({ item, pathname }: { item: Item; pathname: string }) {
   const active = item.match?.(pathname) ?? false
   const content = (
     <>
@@ -74,14 +71,12 @@ function NavItem({ item, pathname, badge }: { item: Item; pathname: string; badg
           {content}
         </SidebarMenuButton>
       )}
-      {badge ? <SidebarMenuBadge className="rounded-full bg-brand-soft text-brand">{badge}</SidebarMenuBadge> : null}
     </SidebarMenuItem>
   )
 }
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const pending = useCorrections((s) => s.requests.filter((r) => r.status === "pending_approval").length)
   const me = PEOPLE[CURRENT_USER]
 
   return (
@@ -116,7 +111,6 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Workflow</SidebarGroupLabel>
           <SidebarMenu>
-            <NavItem item={{ label: "Corrections", icon: PencilLine }} pathname={pathname} badge={pending} />
             <NavItem item={{ label: "Settings", icon: Settings }} pathname={pathname} />
           </SidebarMenu>
         </SidebarGroup>

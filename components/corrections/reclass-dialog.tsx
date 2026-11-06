@@ -114,7 +114,7 @@ function ReclassForm({ onOpenChange, transaction: t, suggestion, existing, ledge
     const request = build("draft")
     save(request)
     onOpenChange(false)
-    toast(`Draft ${request.id} saved`, { description: "Not sent. Find it under corrections in the header." })
+    toast(`Draft ${request.id} saved`, { description: "Not sent. Find it under Corrections in the sidebar." })
   }
 
   return (

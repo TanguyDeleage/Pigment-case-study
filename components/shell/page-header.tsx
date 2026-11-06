@@ -1,6 +1,5 @@
 import { Fragment, type ReactNode } from "react"
 import Link from "next/link"
-import { CorrectionsCounter } from "@/components/corrections/corrections-counter"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,7 +25,7 @@ interface PageHeaderProps {
   actions?: ReactNode
 }
 
-/** Every view carries the data state (period, close status, sync, pending corrections). */
+/** Every view carries the data state (period, close status, sync). */
 export function PageHeader({ crumbs, title, description, actions }: PageHeaderProps) {
   return (
     <>
@@ -55,7 +54,6 @@ export function PageHeader({ crumbs, title, description, actions }: PageHeaderPr
         </Breadcrumb>
         <div className="ml-auto flex items-center gap-2">
           <DataStatus />
-          <CorrectionsCounter />
         </div>
       </header>
       <div className="flex items-end justify-between gap-6 px-6 pt-6 pb-5">

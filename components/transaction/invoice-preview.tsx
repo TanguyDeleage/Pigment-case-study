@@ -1,34 +1,41 @@
 "use client"
 
-import { FileText } from "lucide-react"
+import { Download, Eye } from "lucide-react"
+import { toast } from "sonner"
 import type { InvoiceAttachment, Transaction } from "@/lib/data"
 import { formatEurExact } from "@/lib/finance/format"
+import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 const dateFmt = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" })
-
-export function InvoiceChip({ attachment }: { attachment: InvoiceAttachment }) {
-  return (
-    <span className="flex items-center gap-2.5">
-      <span className="flex size-9 items-center justify-center rounded-lg border bg-muted">
-        <FileText className="size-4 text-muted-foreground" aria-hidden />
-      </span>
-      <span className="text-left">
-        <span className="block text-[13.5px] font-medium">{attachment.fileName}</span>
-        <span className="block text-[12px] text-muted-foreground">PDF · {attachment.sizeKb} KB · from ERP</span>
-      </span>
-    </span>
-  )
-}
 
 export function InvoicePreview({ transaction, attachment }: { transaction: Transaction; attachment: InvoiceAttachment }) {
   const total = attachment.lines.reduce((s, l) => s + l.amount, 0)
   return (
     <Dialog>
-      <DialogTrigger className="flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50">
-        <InvoiceChip attachment={attachment} />
-        <span className="text-[13px] font-medium underline underline-offset-4">Preview</span>
-      </DialogTrigger>
+      <div className="flex items-center gap-3 rounded-xl bg-muted px-3 py-3">
+        <span className="flex h-10 w-9 shrink-0 items-center justify-center rounded-md border bg-card text-[9px] font-bold text-red-600" aria-hidden>
+          PDF
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[13.5px] font-medium">{attachment.fileName}</span>
+          <span className="block text-[12px] text-muted-foreground">Invoice · {attachment.sizeKb} KB</span>
+        </span>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="icon" className="rounded-lg" aria-label={`Preview ${attachment.fileName}`}>
+            <Eye />
+          </Button>
+        </DialogTrigger>
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-lg"
+          aria-label={`Download ${attachment.fileName}`}
+          onClick={() => toast(`Downloading ${attachment.fileName}`, { description: "Prototype: the file isn't stored locally." })}
+        >
+          <Download />
+        </Button>
+      </div>
       <DialogContent className="sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle>{attachment.fileName}</DialogTitle>
@@ -54,7 +61,7 @@ export function InvoicePreview({ transaction, attachment }: { transaction: Trans
             {attachment.note && (
               <div>
                 <div className="text-[11px] tracking-wide text-muted-foreground uppercase">Reference</div>
-                <div className="rounded-sm bg-amber-100/70 px-1 font-medium text-foreground">{attachment.note}</div>
+                <div className="font-medium text-foreground">{attachment.note}</div>
               </div>
             )}
           </div>

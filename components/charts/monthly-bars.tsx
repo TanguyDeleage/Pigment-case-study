@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { MONTHS } from "@/lib/data/calendar"
 import type { MonthPoint } from "@/lib/finance/aggregate"
 import { MINUS, formatEur, formatPct } from "@/lib/finance/format"
@@ -17,6 +17,8 @@ interface MonthlyBarsProps {
   /** Display unit for bar labels: €M with one decimal, or €k whole numbers. */
   unit: "M" | "k"
   panelHeight?: number
+  /** Fill the parent's height: panel height is derived from the measured container. */
+  fit?: boolean
   ariaLabel: string
   /** Month to highlight; defaults to the provisional month. */
   selectedMonth?: number
@@ -35,8 +37,27 @@ const TOP = 14
  * IBCS-style column chart: AC solid, BU outlined behind it, provisional AC lighter with
  * a dotted outline. Small multiples share one scale ("same unit, same scale").
  */
-export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel, selectedMonth }: MonthlyBarsProps) {
+export function MonthlyBars({ panels, unit, panelHeight: fixedPanelHeight = 104, fit = false, ariaLabel, selectedMonth }: MonthlyBarsProps) {
   const [hover, setHover] = useState<number | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [fitHeight, setFitHeight] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!fit || !containerRef.current) return
+    const el = containerRef.current
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      if (!width || !height) return
+      // Convert the container's pixel height into viewBox units, then strip the fixed chrome.
+      const vbH = (height * W) / width
+      const chrome = TOP + AXIS_H + (panels.length - 1) * PANEL_GAP + panels.length * (LABEL_H + DELTA_H)
+      setFitHeight(Math.max(48, (vbH - chrome) / panels.length))
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [fit, panels.length])
+
+  const panelHeight = fit ? (fitHeight ?? fixedPanelHeight) : fixedPanelHeight
   const max = Math.max(...panels.flatMap((p) => p.series.flatMap((s) => [s.actual ?? 0, s.budget])))
   const scale = (v: number) => (v / max) * panelHeight
   const cw = (W - ML - MR) / 12
@@ -51,12 +72,12 @@ export function MonthlyBars({ panels, unit, panelHeight = 104, ariaLabel, select
   const fmtDelta = (v: number) => {
     const r = unit === "M" ? Math.round(v / 100_000) / 10 : Math.round(v / 1000)
     const body = unit === "M" ? Math.abs(r).toFixed(1) : Math.abs(r).toLocaleString("en-GB")
-    return `${r > 0 ? "+" : r < 0 ? MINUS : "±"}${body}`
+    return `${r > 0 ? "+" : r < 0 ? MINUS : ""}${body}`
   }
 
   return (
-    <div className="relative">
-      <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label={ariaLabel}>
+    <div ref={containerRef} className={fit ? "relative h-full" : "relative"}>
+      <svg viewBox={`0 0 ${W} ${H}`} className={fit ? "block size-full" : "block w-full"} role="img" aria-label={ariaLabel}>
         {selected >= 0 && (
           <g>
             <rect x={ML + selected * cw + 2} y={0} width={cw - 4} height={H - AXIS_H + 6} className="fill-band" rx={6} />
