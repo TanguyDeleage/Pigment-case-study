@@ -4,7 +4,9 @@ import { useState } from "react"
 import { Send } from "lucide-react"
 import { toast } from "sonner"
 import { CURRENT_USER, DEPARTMENT_ORDER, DEPARTMENTS, PEOPLE, lineLabel, type DepartmentId, type Ledger, type Transaction } from "@/lib/data"
+import { CURRENT_MONTH, MONTH_NAMES } from "@/lib/data/calendar"
 import { formatEur } from "@/lib/finance/format"
+import { reclassImpact } from "@/lib/corrections/impact"
 import { MIN_COMMENT_LENGTH, isCommentValid, routeApprover } from "@/lib/corrections/routing"
 import { nextRequestId, useCorrections } from "@/lib/corrections/store"
 import type { Coding, CorrectionRequest } from "@/lib/corrections/types"
@@ -121,6 +123,8 @@ export function CodingEditor({ transaction: t, from, existing, ledger, onDone }:
       </div>
       {touched && errors.to && <p className="text-[12.5px] text-unfav">{errors.to}</p>}
 
+      {!unchanged && <ImpactPreview ledger={ledger} from={from} to={{ deptId: toDept, accountCode: toAccount }} amount={t.amount} />}
+
       <div>
         <Label htmlFor="coding-comment" className="mb-2 text-[13.5px] font-semibold">
           Why this change?
@@ -146,6 +150,28 @@ export function CodingEditor({ transaction: t, from, existing, ledger, onDone }:
           <Send /> Send suggestion
         </Button>
       </div>
+    </div>
+  )
+}
+
+/** Before → after month figures for the source and destination lines. Projection only, nothing is saved. */
+function ImpactPreview({ ledger, from, to, amount }: { ledger: Ledger; from: Coding; to: Coding; amount: number }) {
+  const rows = reclassImpact(ledger, from, to, amount, CURRENT_MONTH).filter((r) => r.scope === "line")
+  return (
+    <div className="rounded-lg border px-3 py-2.5 text-[13px]">
+      <div className="text-[12px] text-muted-foreground">Impact · {MONTH_NAMES[CURRENT_MONTH]}</div>
+      {rows.map((r) => (
+        <div key={r.key} className="pt-2 tabular-nums">
+          <div className="truncate font-medium">
+            {DEPARTMENTS[r.coding.deptId].name} · {lineLabel(r.coding.accountCode)}
+          </div>
+          <div>
+            <span className="text-muted-foreground">{formatEur(r.before.actual)} → </span>
+            {formatEur(r.after.actual)}
+            <span className="text-muted-foreground"> / {formatEur(r.before.budget)}</span>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
